@@ -1,0 +1,55 @@
+{% extends 'owner_base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg">
+        <!-- Header -->
+        <div class="card-header bg-danger text-white text-center">
+            <h3 class="fw-bold"><i class="fas fa-exclamation-triangle me-2"></i>⚠️ Confirm Deletion</h3>
+        </div>
+        <!-- Body -->
+        <div class="card-body text-center">
+            <p class="lead">🛑 Are you sure you want to delete the booking rule for:</p>
+            <h5 class="fw-bold text-primary">🏠 {{ booking_rule.house }}</h5>
+            <p>📅 <strong>Minimum Months to Pay:</strong> <span class="text-muted">{{ booking_rule.minimum_months_to_pay }}</span></p>
+            <p>📜 <strong>Payment Terms:</strong> <span class="text-muted">{{ booking_rule.payment_terms }}</span></p>
+        </div>
+        <!-- Footer -->
+        <div class="card-footer d-flex justify-content-center gap-3">
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-lg">
+                    🗑️ Confirm Delete
+                </button>
+            </form>
+            <a href="{% url 'booking_rules_list' %}" class="btn btn-secondary btn-lg">
+                ❌ Cancel
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Styles -->
+<style>
+    .btn-danger {
+        font-size: 1rem;
+        font-weight: bold;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .btn-secondary {
+        font-size: 1rem;
+        font-weight: bold;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .card-body {
+        background-color: #f8d7da;
+    }
+    .text-primary {
+        font-size: 1.2rem;
+    }
+</style>
+{% endblock %}

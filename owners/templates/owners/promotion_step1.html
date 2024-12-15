@@ -1,0 +1,244 @@
+{% extends 'agent_base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container-fluid" style="margin-top: 50px; background: #ece5dd; min-height: calc(100vh - 50px);">
+
+    <style>
+        body {
+            background-color: #ece5dd;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .promotion-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid #ccc;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 120px);
+        }
+
+        .promotion-header {
+            background: linear-gradient(135deg, #009688, #007e6d);
+            color: #fff;
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 18px;
+            position: relative;
+        }
+
+        .promotion-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .option-group {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .option-group h5 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .option-group h5 i {
+            margin-right: 8px;
+            color: #009688;
+        }
+
+        .radio-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .radio-list li {
+            margin-bottom: 10px;
+        }
+
+        .radio-list input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .radio-list label {
+            font-size: 14px;
+            color: #333;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn-primary {
+            background-color: #009688;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 20px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #007e6d;
+        }
+
+        /* Rooms Section */
+        .rooms-section h5 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .rooms-section h5 i {
+            margin-right: 8px;
+            color: #fbc02d;
+        }
+
+        .form-check-input {
+            margin-top: 0.3rem;
+        }
+
+        .room-desc-label {
+            font-weight: 500;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        /* Scrollbar styling */
+        .promotion-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        .promotion-content::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+        .promotion-content::-webkit-scrollbar-track {
+            background: #f0f0f0;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .btn-primary {
+                width: 100%;
+                border-radius: 10px;
+            }
+        }
+    </style>
+
+    <div class="promotion-container">
+        <div class="promotion-header">
+            <i class="fas fa-bullhorn"></i> Promotion Step 1
+        </div>
+        <div class="promotion-content">
+            <form method="post" id="promotion-form">
+                {% csrf_token %}
+                
+                <!-- House Selection -->
+                <div class="option-group">
+                    <h5><i class="fas fa-home"></i>Select House to Promote</h5>
+                    {{ form.house }}
+                </div>
+
+                <!-- Promote Choice -->
+                <div class="option-group">
+                    <h5><i class="fas fa-adjust"></i>What do you want to promote?</h5>
+                    {{ form.promote_choice }}
+                </div>
+
+                <!-- Whole House Description -->
+                <div class="option-group whole-desc-group">
+                    <h5><i class="fas fa-align-left"></i>Whole House Description</h5>
+                    {{ form.description_whole_house|as_crispy_field }}
+                </div>
+
+                <!-- Rooms Section (if any) -->
+                {% if rooms %}
+                <hr>
+                <input type="hidden" name="rooms_submitted" value="1">
+                <div class="rooms-section">
+                    <h5><i class="fas fa-bed"></i>Select Rooms to Promote</h5>
+                    {% for room in rooms %}
+                        <div class="form-check mb-2">
+                            <input class="form-check-input room-checkbox" type="checkbox" name="room_selected_{{ room.id }}" id="room-{{ room.id }}" value="{{ room.id }}">
+                            <label class="form-check-label" for="room-{{ room.id }}">
+                                Room {{ room.room_number }} - {{ room.description|default:"(No description)" }}
+                            </label>
+                        </div>
+                    {% endfor %}
+                    <div id="room-descriptions-container" style="margin-top: 20px;"></div>
+                </div>
+                {% endif %}
+
+                <div class="mt-4 text-end">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-arrow-right"></i> Next</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const promoteChoiceInputs = document.querySelectorAll('input[name="promote_choice"]');
+    const wholeHouseDescGroup = document.querySelector('.whole-desc-group');
+    const roomsSectionCheckboxes = document.querySelectorAll('.room-checkbox');
+    const roomDescriptionsContainer = document.getElementById('room-descriptions-container');
+
+    function updateVisibility() {
+        let chosen = document.querySelector('input[name="promote_choice"]:checked');
+        if (chosen && chosen.value === 'house') {
+            if (wholeHouseDescGroup) {
+                wholeHouseDescGroup.style.display = 'block';
+            }
+            if (roomDescriptionsContainer) {
+                roomDescriptionsContainer.innerHTML = '';
+            }
+        } else if (chosen && chosen.value === 'room') {
+            if (wholeHouseDescGroup) {
+                wholeHouseDescGroup.style.display = 'none';
+            }
+        } else {
+            if (wholeHouseDescGroup) {
+                wholeHouseDescGroup.style.display = 'block';
+            }
+        }
+    }
+
+    promoteChoiceInputs.forEach(input => {
+        input.addEventListener('change', updateVisibility);
+    });
+    updateVisibility();
+
+    roomsSectionCheckboxes.forEach(chk => {
+        chk.addEventListener('change', function() {
+            roomDescriptionsContainer.innerHTML = '';
+            document.querySelectorAll('.room-checkbox:checked').forEach(selectedChk => {
+                const roomId = selectedChk.value;
+                const div = document.createElement('div');
+                div.className = 'mb-3';
+                div.innerHTML = `
+                    <label class="room-desc-label">Description for Room ${roomId}:</label>
+                    <textarea name="room_description_${roomId}" class="form-control" placeholder="Enter description for this room..."></textarea>
+                `;
+                roomDescriptionsContainer.appendChild(div);
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+    <h1 class="text-center mb-4" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: 700;">
+        Our Agents
+    </h1>
+    <p class="text-center text-muted mb-5" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+        Meet our team of dedicated agents, always ready to assist you.
+    </p>
+
+    <div class="row g-4">
+        {% for agent in agents %}
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 d-flex align-items-stretch">
+            <div class="card shadow-sm w-100" style="border-radius: 20px; overflow: hidden; background: linear-gradient(135deg, #fce38a, #f38181);">
+                <div class="card-body d-flex flex-column" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+                    <div class="text-center mb-3">
+                        {% if agent.profile_picture %}
+                            <img src="{{ agent.profile_picture.url }}" alt="{{ agent.first_name }} {{ agent.last_name }}" class="img-fluid rounded-circle border border-white border-3" style="width: 100px; height: 100px; object-fit: cover;">
+                        {% else %}
+                            <img src="/static/images/default-profile.png" alt="Default Profile" class="img-fluid rounded-circle border border-white border-3" style="width: 100px; height: 100px; object-fit: cover;">
+                        {% endif %}
+                    </div>
+
+                    <h5 class="card-title text-center" style="font-weight: 600; color: #333;">{{ agent.first_name }} {{ agent.last_name }}</h5>
+                    <p class="card-subtitle mb-2 text-center text-muted" style="font-size: 0.9rem;">
+                        @{{ agent.user.username }}
+                    </p>
+
+                    <!-- Agent Phone Numbers -->
+                    <p class="text-center" style="font-size: 0.85rem;">
+                        <strong>Agent Phone(s):</strong><br>
+                        {{ agent.phone_number }}<br>
+                        {% if agent.user.phone_number1 %}
+                            {{ agent.user.phone_number1 }}<br>
+                        {% endif %}
+                        {% if agent.user.phone_number2 %}
+                            {{ agent.user.phone_number2 }}
+                        {% endif %}
+                    </p>
+
+                    <ul class="list-unstyled mt-3 mb-4 text-center" style="font-size: 0.85rem;">
+                        <li><strong>Email:</strong> {{ agent.email }}</li>
+                        <li><strong>Status:</strong> {{ agent.get_status_display }}</li>
+                        {% if agent.commission_rate %}
+                            <li><strong>Commission:</strong> {{ agent.commission_rate }}%</li>
+                        {% endif %}
+                    </ul>
+
+                    {% if agent.assigned_houses.all %}
+                        <div class="mt-auto" style="font-size: 0.85rem;">
+                            <h6 class="text-center" style="font-weight: 600;">Assigned Houses:</h6>
+                            <ul class="list-unstyled text-center">
+                                {% for house in agent.assigned_houses.all %}
+                                    <li class="mb-2">
+                                        <strong>{{ house.house_name }}</strong><br>
+                                        <span class="text-muted" style="font-size: 0.8rem;">
+                                            {{ house.house_number }}, {{ house.street }}, {{ house.ward }}, {{ house.district }}, {{ house.region }}
+                                        </span>
+                                        <br>
+                                        <!-- Owner Details -->
+                                        <strong>Owner:</strong> {{ house.owner.first_name }} {{ house.owner.surname }}<br>
+                                        <strong>Owner Phone(s):</strong> 
+                                        {{ house.owner.user.phone_number1 }} 
+                                        {% if house.owner.user.phone_number2 %}
+                                            , {{ house.owner.user.phone_number2 }}
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% else %}
+                        <p class="text-center mt-auto" style="font-size: 0.85rem;">No assigned houses.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

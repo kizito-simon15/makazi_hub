@@ -1,0 +1,48 @@
+{% extends "owner_base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-primary fw-bold mb-4">
+        <i class="bi bi-pencil-square me-2"></i>Update Bill
+    </h2>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- Bill Details -->
+        <div class="card mb-4 shadow-lg">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {{ form.title.label_tag }}
+                        {{ form.title }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.amount.label_tag }}
+                        {{ form.amount }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.validity_period.label_tag }}
+                        {{ form.validity_period }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.reference_number.label_tag }}
+                        {{ form.reference_number }}
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        {{ form.description.label_tag }}
+                        {{ form.description }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save me-2"></i>Update Bill
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

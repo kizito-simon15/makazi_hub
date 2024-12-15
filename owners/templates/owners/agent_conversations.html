@@ -1,0 +1,199 @@
+{% extends 'agent_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid p-0" style="max-width: 600px; margin: 0 auto;">
+    <style>
+        body {
+            background-color: #ece5dd; /* WhatsApp-like background */
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+
+        .topbar {
+            background-color: #075e54;
+            color: #fff;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .topbar .title {
+            flex: 1;
+            text-align: center;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .topbar .back-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .conversation-list {
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .conversation-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+            text-decoration: none;
+            color: #333;
+            transition: background 0.3s;
+        }
+
+        .conversation-item:last-child {
+            border-bottom: none;
+        }
+
+        .conversation-item:hover {
+            background: #f0f0f0;
+            text-decoration: none;
+        }
+
+        .conversation-item img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+            border: 2px solid #ddd;
+        }
+
+        .conversation-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .conversation-details .top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .conversation-details .top-row strong {
+            font-size: 16px;
+            color: #000;
+        }
+
+        .conversation-details .top-row small {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .snippet {
+            font-size: 14px;
+            color: #555;
+            margin-top: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        .agent-icon {
+            margin-right: 8px;
+            font-size: 18px;
+            color: #075e54;
+        }
+
+        .unread-badge {
+            background: #25d366;
+            color: #fff;
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 12px;
+            margin-left: 10px;
+            font-weight: 500;
+        }
+
+        /* Scrollbar Styling */
+        .conversation-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        .conversation-list::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+        .conversation-list::-webkit-scrollbar-track {
+            background: #f0f0f0;
+        }
+
+        @media (max-width: 600px) {
+            .conversation-item img {
+                width: 40px;
+                height: 40px;
+            }
+
+            .conversation-details .top-row strong {
+                font-size: 14px;
+            }
+
+            .conversation-details .top-row small {
+                font-size: 11px;
+            }
+
+            .snippet {
+                font-size: 13px;
+            }
+        }
+    </style>
+
+    <!-- Top bar -->
+    <div class="topbar">
+        <button class="back-btn" onclick="window.history.back();">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <div class="title">Your Conversations</div>
+        <div style="width: 30px;"></div>
+    </div>
+
+    <!-- Conversation List -->
+    <div class="conversation-list mt-3">
+        {% if clients_info %}
+            {% for info in clients_info %}
+            <a href="{% url 'agent_chat' info.client.id %}" class="conversation-item">
+                {% if info.client.profile_picture %}
+                    <img src="{{ info.client.profile_picture.url }}" alt="{{ info.client.first_name }}">
+                {% else %}
+                    <img src="{% static 'images/default.png' %}" alt="{{ info.client.first_name }}">
+                {% endif %}
+                <div class="conversation-details">
+                    <div class="top-row">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-user agent-icon"></i>
+                            <strong>{{ info.client.first_name }} {{ info.client.surname }}</strong>
+                            {% if info.unread_count > 0 %}
+                                <span class="unread-badge">{{ info.unread_count }}</span>
+                            {% endif %}
+                        </div>
+                        {% if info.last_message_time %}
+                        <small>{{ info.last_message_time|date:"M d, H:i" }}</small>
+                        {% endif %}
+                    </div>
+                    <div class="snippet">{{ info.last_message_snippet }}</div>
+                </div>
+            </a>
+            {% endfor %}
+        {% else %}
+            <div class="text-center text-muted" style="margin-top: 50px;">
+                No conversations yet.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

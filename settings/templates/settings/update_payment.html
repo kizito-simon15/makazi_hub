@@ -1,0 +1,90 @@
+{% extends 'owner_base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Header -->
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white">
+            <h2 class="text-center"><i class="fas fa-edit me-2"></i>Update Payment Method</h2>
+        </div>
+
+        <!-- Update Payment Form -->
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="house" class="form-label text-dark">
+                        <i class="fas fa-home me-2 text-primary"></i>House
+                    </label>
+                    {{ form.house }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="method_name" class="form-label text-dark">
+                        <i class="fas fa-cash-register me-2 text-success"></i>Payment Method
+                    </label>
+                    {{ form.method_name }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="provider" class="form-label text-dark">
+                        <i class="fas fa-building me-2 text-info"></i>Provider
+                    </label>
+                    {{ form.provider }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="account_details" class="form-label text-dark">
+                        <i class="fas fa-id-card me-2 text-warning"></i>Account Details
+                    </label>
+                    {{ form.account_details }}
+                </div>
+
+                <!-- Number -->
+                <div class="mb-3">
+                    <label for="number" class="form-label text-dark">
+                        <i class="fas fa-phone me-2 text-primary"></i>Recipient Number
+                    </label>
+                    {{ form.number }}
+                </div>
+
+                <!-- Recipient Name -->
+                <div class="mb-3">
+                    <label for="recipient_name" class="form-label text-dark">
+                        <i class="fas fa-user me-2 text-primary"></i>Recipient Name
+                    </label>
+                    {{ form.recipient_name }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="instructions" class="form-label text-dark">
+                        <i class="fas fa-info-circle me-2 text-danger"></i>Instructions
+                    </label>
+                    {{ form.instructions }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="status" class="form-label text-dark">
+                        <i class="fas fa-toggle-on me-2 text-secondary"></i>Status
+                    </label>
+                    {{ form.status }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="currency" class="form-label text-dark">
+                        <i class="fas fa-coins me-2 text-primary"></i>Currency
+                    </label>
+                    {{ form.currency }}
+                </div>
+
+                <!-- Submit Button -->
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="fas fa-save me-2"></i>Update Payment Method
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

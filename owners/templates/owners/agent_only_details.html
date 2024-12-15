@@ -1,0 +1,183 @@
+{% extends 'agent_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid px-0" style="margin-top: 50px; min-height: calc(100vh - 50px); background: linear-gradient(135deg, #09b685, #08a27f);">
+
+    <style>
+        body {
+            background-color: #ece5dd;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .details-container {
+            max-width: 700px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid #ccc;
+            padding: 30px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .details-header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .details-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: #075e54;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .details-header h2 i {
+            margin-right: 10px;
+            font-size: 26px;
+        }
+
+        .details-header p {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 0;
+        }
+
+        .profile-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .profile-section img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #ddd;
+            margin-bottom: 15px;
+        }
+
+        .profile-section .name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .profile-section .status {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .info-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .info-list li {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+            font-size: 15px;
+            color: #555;
+        }
+
+        .info-list li i {
+            margin-right: 10px;
+            color: #075e54;
+            font-size: 18px;
+            flex-shrink: 0;
+            width: 30px;
+            text-align: center;
+        }
+
+        .houses-section {
+            margin-top: 30px;
+        }
+
+        .houses-section h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #075e54;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .houses-section h3 i {
+            margin-right: 8px;
+            font-size: 20px;
+        }
+
+        .house-item {
+            background: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .house-item strong {
+            color: #000;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 600px) {
+            .details-container {
+                margin: 20px;
+                padding: 20px;
+            }
+            .info-list li {
+                font-size: 14px;
+            }
+        }
+    </style>
+
+    <div class="details-container">
+        <div class="details-header">
+            <h2><i class="fas fa-user-tie"></i>Agent Details</h2>
+            <p>Your account and assigned houses.</p>
+        </div>
+
+        <div class="profile-section">
+            {% if agent.profile_picture %}
+                <img src="{{ agent.profile_picture.url }}" alt="{{ agent.first_name }}">
+            {% else %}
+                <img src="{% static 'images/default.png' %}" alt="{{ agent.first_name }}">
+            {% endif %}
+            <div class="name">{{ agent.first_name }} {{ agent.last_name }}</div>
+            <div class="status">{{ agent.get_status_display }}</div>
+        </div>
+
+        <ul class="info-list">
+            <li><i class="fas fa-at"></i>{{ agent.email }}</li>
+            <li><i class="fas fa-phone-alt"></i>{{ agent.phone_number }}</li>
+            <li><i class="fas fa-percentage"></i>Commission Rate: {% if agent.commission_rate %}{{ agent.commission_rate }}%{% else %}N/A{% endif %}</li>
+            <li><i class="fas fa-calendar-check"></i>Joined: {{ agent.created_at|date:"M d, Y" }}</li>
+            <li><i class="fas fa-check-circle"></i>Verified: {{ agent.is_verified|yesno:"Yes,No" }}</li>
+        </ul>
+
+        <div class="houses-section">
+            <h3><i class="fas fa-home"></i>Assigned Houses</h3>
+            {% if assigned_houses %}
+                {% for h in assigned_houses %}
+                    <div class="house-item">
+                        <strong>{{ h.house_name }}</strong><br>
+                        {{ h.region }}, {{ h.district }}, {{ h.ward }}, {{ h.street }} - House #{{ h.house_number }}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">No houses assigned.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

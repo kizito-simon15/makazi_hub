@@ -1,0 +1,96 @@
+{% extends 'owner_base.html' %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-center align-items-center mb-4">
+        <h2 class="text-primary text-center"><i class="fas fa-users me-2"></i>Your Agents</h2>
+    </div>
+    <div class="d-flex justify-content-center mb-4">
+        <a href="{% url 'create_agent' %}" class="btn btn-success shadow-sm">
+            <i class="fas fa-user-plus me-2"></i>Create Agent
+        </a>
+    </div>
+
+    <!-- Agents List -->
+    {% if agents %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 justify-content-center">
+        {% for agent in agents %}
+        <div class="col d-flex justify-content-center">
+            <div class="card shadow-lg h-100" style="border-radius: 15px; overflow: hidden; max-width: 400px;">
+                <!-- Agent Header -->
+                <div class="card-header text-white text-center" style="background: linear-gradient(135deg, #6a11cb, #2575fc);">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 text-center w-100">{{ agent.first_name }} {{ agent.last_name }}</h5>
+                        <div class="position-absolute" style="top: 10px; right: 10px;">
+                            <a href="{% url 'edit_agent' agent.id %}" class="btn btn-light btn-sm">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'delete_agent' agent.id %}" class="btn btn-light btn-sm ms-2">
+                                <i class="fas fa-trash-alt text-danger"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Picture -->
+                <div class="text-center py-3">
+                    {% if agent.profile_picture %}
+                        <img src="{{ agent.profile_picture.url }}" alt="{{ agent.first_name }} {{ agent.last_name }}" class="img-fluid rounded-circle border border-3 border-white shadow-sm" style="width: 120px; height: 120px; object-fit: cover;">
+                    {% else %}
+                        <i class="fas fa-user-circle text-secondary" style="font-size: 120px;"></i>
+                    {% endif %}
+                </div>
+
+                <!-- Agent Details -->
+                <div class="card-body text-center">
+                    <p><i class="fas fa-envelope text-primary me-2"></i><strong>Email:</strong> {{ agent.email }}</p>
+                    <p><i class="fas fa-phone-alt text-success me-2"></i><strong>Phone:</strong> {{ agent.phone_number }}</p>
+                    <p><i class="fas fa-info-circle text-warning me-2"></i><strong>Status:</strong> 
+                        <span class="badge 
+                            {% if agent.status == 'Active' %}bg-success{% elif agent.status == 'Inactive' %}bg-secondary{% else %}bg-danger{% endif %}">
+                            {{ agent.status }}
+                        </span>
+                    </p>
+                    <p><i class="fas fa-percentage text-info me-2"></i><strong>Commission Rate:</strong> {{ agent.commission_rate|default:"N/A" }}%</p>
+                    <p><i class="fas fa-check-circle text-dark me-2"></i><strong>Verified:</strong> 
+                        <span class="badge {% if agent.is_verified %}bg-success{% else %}bg-danger{% endif %}">
+                            {% if agent.is_verified %}Yes{% else %}No{% endif %}
+                        </span>
+                    </p>
+                    <h6 class="mt-3"><i class="fas fa-home text-primary me-2"></i>Assigned Houses:</h6>
+                    <ul class="list-group">
+                        {% for house in agent.assigned_houses.all %}
+                        <li class="list-group-item text-center">
+                            <i class="fas fa-building text-primary me-2"></i>{{ house }}
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item text-muted">No houses assigned.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- Footer -->
+                <div class="card-footer text-center" style="background-color: #f8f9fa;">
+                    <form method="post" action="{% url 'update_agent_verification' agent.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button 
+                            type="submit" 
+                            class="btn {% if agent.is_verified %}btn-danger{% else %}btn-success{% endif %} btn-sm shadow-sm">
+                            <i class="fas fa-check-circle me-2"></i>
+                            {% if agent.is_verified %}Unverify{% else %}Verify{% endif %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- No Agents Message -->
+    <div class="alert alert-warning text-center mt-4" role="alert">
+        <i class="fas fa-info-circle me-2"></i>You have not added any agents yet. Click "Create Agent" to add your first one!
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

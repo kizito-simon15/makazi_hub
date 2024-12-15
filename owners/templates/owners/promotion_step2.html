@@ -1,0 +1,282 @@
+{% extends 'agent_base.html' %}
+{% load crispy_forms_tags static %}
+
+{% block content %}
+<div class="container-fluid" style="margin-top: 50px; background: #ece5dd; min-height: calc(100vh - 50px);">
+
+    <style>
+        body {
+            background-color: #ece5dd;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .promotion-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid #ccc;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .promotion-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .promotion-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .info-text {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .room-block,
+        .house-block {
+            background: #fefefe;
+            border: 1px solid #eee;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .room-block h5,
+        .house-block h5 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .room-block h5 i,
+        .house-block h5 i {
+            margin-right: 8px;
+            color: #009688;
+        }
+
+        .media-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+
+        .media-table th {
+            background: #f0f0f0;
+            font-weight: 600;
+            font-size: 14px;
+            border-bottom: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .media-table td {
+            border-bottom: 1px solid #eee;
+            padding: 8px;
+            vertical-align: middle;
+        }
+
+        .btn-add-media {
+            background: none;
+            border: none;
+            color: #009688;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-add-media i {
+            margin-right: 5px;
+        }
+
+        .btn-primary {
+            background-color: #009688;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 20px;
+            font-weight: 600;
+            margin-top: 20px;
+            float: right;
+        }
+
+        .btn-primary:hover {
+            background-color: #007e6d;
+        }
+
+        /* Scrollbar styling */
+        .promotion-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        .promotion-container::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+        .promotion-container::-webkit-scrollbar-track {
+            background: #f0f0f0;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .media-table td, 
+            .media-table th {
+                font-size: 12px;
+                padding: 6px;
+            }
+        }
+    </style>
+
+    <div class="promotion-container">
+        <div class="promotion-header">
+            <h2>Step 2: Upload Media</h2>
+            {% if promote_choice == 'house' %}
+                <p class="info-text">You are promoting the entire house: {{ house.house_name }}. Please upload images or videos that will help attract clients.</p>
+            {% else %}
+                <p class="info-text">You selected {{ rooms_count }} room(s) to promote in {{ house.house_name }}. Please upload media for each room below.</p>
+            {% endif %}
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            {% if promote_choice == 'house' %}
+                <!-- One block for the whole house -->
+                {% for label, formset in formsets %}
+                <div class="house-block" data-formset-container="{{ formset.prefix }}">
+                    <h5><i class="fas fa-home"></i> {{ house.house_name }} Media</h5>
+                    {{ formset.management_form }}
+                    <table class="media-table" id="{{ formset.prefix }}-table">
+                        <thead>
+                            <tr>
+                                <th>Media Type</th>
+                                <th>File</th>
+                                <th>Caption</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for form in formset %}
+                            <tr class="form-row">
+                                <td>{{ form.media_type }}</td>
+                                <td>{{ form.file }}</td>
+                                <td>{{ form.caption }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <!-- Hidden empty template row for JS cloning -->
+                    <table style="display:none;">
+                        <tbody>
+                            <tr class="empty-form-row" id="{{ formset.prefix }}-empty-form">
+                                <td>
+                                    {{ formset.empty_form.media_type }}
+                                </td>
+                                <td>
+                                    {{ formset.empty_form.file }}
+                                </td>
+                                <td>
+                                    {{ formset.empty_form.caption }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <button type="button" class="btn-add-media" onclick="addForm('{{ formset.prefix }}');">
+                        <i class="fas fa-plus-circle"></i>Add More Media
+                    </button>
+                </div>
+                {% endfor %}
+            {% else %}
+                <!-- One block per room -->
+                {% for room, formset in formsets %}
+                <div class="room-block" data-formset-container="{{ formset.prefix }}">
+                    <h5><i class="fas fa-bed"></i> Room {{ room.room_number }} Media</h5>
+                    {{ formset.management_form }}
+                    <table class="media-table" id="{{ formset.prefix }}-table">
+                        <thead>
+                            <tr>
+                                <th>Media Type</th>
+                                <th>File</th>
+                                <th>Caption</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for form in formset %}
+                            <tr class="form-row">
+                                <td>{{ form.media_type }}</td>
+                                <td>{{ form.file }}</td>
+                                <td>{{ form.caption }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <!-- Hidden empty template row for JS cloning -->
+                    <table style="display:none;">
+                        <tbody>
+                            <tr class="empty-form-row" id="{{ formset.prefix }}-empty-form">
+                                <td>
+                                    {{ formset.empty_form.media_type }}
+                                </td>
+                                <td>
+                                    {{ formset.empty_form.file }}
+                                </td>
+                                <td>
+                                    {{ formset.empty_form.caption }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <button type="button" class="btn-add-media" onclick="addForm('{{ formset.prefix }}');">
+                        <i class="fas fa-plus-circle"></i>Add More Media
+                    </button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-check"></i> Finish
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+function addForm(prefix) {
+    // Locate the empty form template
+    var emptyForm = document.getElementById(prefix + '-empty-form');
+    if (!emptyForm) {
+        alert('Empty form template not found for ' + prefix);
+        return;
+    }
+
+    // Clone the empty form row
+    var newForm = emptyForm.cloneNode(true);
+    newForm.id = ''; // remove id from clone
+
+    // Get TOTAL_FORMS input
+    var totalFormsInput = document.querySelector('input[name="' + prefix + '-TOTAL_FORMS"]');
+    var totalForms = parseInt(totalFormsInput.value, 10);
+
+    // Update the form index in names and ids
+    var regex = new RegExp(prefix + '-__prefix__', 'g');
+    newForm.innerHTML = newForm.innerHTML.replace(regex, prefix + '-' + totalForms);
+
+    // Insert the new form row before the add button
+    var table = document.getElementById(prefix + '-table');
+    table.querySelector('tbody').appendChild(newForm);
+
+    // Increment TOTAL_FORMS
+    totalFormsInput.value = totalForms + 1;
+}
+</script>
+{% endblock %}

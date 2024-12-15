@@ -1,0 +1,114 @@
+{% extends 'client_base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg" style="border-radius: 20px; overflow: hidden;">
+        <!-- Header Section -->
+        <div class="card-header bg-gradient text-white text-center py-4" style="background: linear-gradient(135deg, #4caf50, #81c784);">
+            <h2 class="mb-0">
+                <i class="fas fa-door-open me-2"></i>Create Booking for Room {{ room.room_number }}
+            </h2>
+        </div>
+
+        <!-- Body Section -->
+        <div class="card-body" style="background-color: #f9f9f9;">
+            <div class="info-box mb-4 p-3 rounded shadow-sm" style="background-color: #ffffff;">
+                <h5 class="text-primary"><i class="fas fa-home me-2"></i>House:</h5>
+                <p class="mb-2"><strong>{{ house.house_name }}</strong></p>
+
+                <h5 class="text-primary"><i class="fas fa-info-circle me-2"></i>Room Description:</h5>
+                <p>{{ room.description }}</p>
+
+                <h5 class="text-success"><i class="fas fa-tag me-2"></i>Rental Price:</h5>
+                <p><strong>{{ room.rental_price }} TZS</strong> (per month)</p>
+            </div>
+
+            {% if rule %}
+            <div class="info-box mb-4 p-3 rounded shadow-sm" style="background-color: #ffffff;">
+                <h5 class="text-warning"><i class="fas fa-calendar-alt me-2"></i>Booking Details:</h5>
+                <ul class="list-group">
+                    <li class="list-group-item"><strong>Minimum Months to Pay:</strong> {{ rule.minimum_months_to_pay }}</li>
+                    <li class="list-group-item"><strong>Total Amount to Pay:</strong> {{ total_amount_to_pay }} TZS</li>
+                    <li class="list-group-item"><strong>Initial Amount to Owner:</strong> {{ initial_amount_to_owner }} TZS</li>
+                    <li class="list-group-item"><strong>Amount to Agent:</strong> {{ amount_to_agent }} TZS</li>
+                </ul>
+            </div>
+            <div class="info-box mb-4 p-3 rounded shadow-sm" style="background-color: #ffffff;">
+                <h5 class="text-danger"><i class="fas fa-file-alt me-2"></i>Payment Terms:</h5>
+                <p>{{ rule.payment_terms|linebreaks }}</p>
+            </div>
+            {% else %}
+            <div class="alert alert-warning text-center" style="border-radius: 10px;">
+                <i class="fas fa-exclamation-circle me-2"></i>No specific booking rules for this room.
+            </div>
+            {% endif %}
+
+            <!-- Payment Methods -->
+            <div class="info-box mb-4 p-3 rounded shadow-sm" style="background-color: #ffffff;">
+                <h5 class="text-info"><i class="fas fa-money-bill-wave me-2"></i>Select Payment Method:</h5>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        {% for payment in payment_methods %}
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check p-3 border rounded shadow-sm" style="background-color: #fefefe;">
+                                <input class="form-check-input" type="radio" name="payment_method" id="payment{{ payment.id }}" value="{{ payment.id }}">
+                                <label class="form-check-label d-flex align-items-center" for="payment{{ payment.id }}">
+                                    {% if payment.provider == 'M-Pesa' %}
+                                        <img src="{% static 'images/mpesa.png' %}" alt="M-Pesa" class="payment-logo">
+                                    {% elif payment.provider == 'Yas' %}
+                                        <img src="{% static 'images/tigopesa.png' %}" alt="Tigo Pesa" class="payment-logo">
+                                    {% elif payment.provider == 'Airtel Money' %}
+                                        <img src="{% static 'images/airtelmoney.png' %}" alt="Airtel Money" class="payment-logo">
+                                    {% elif payment.provider == 'Halopesa' %}
+                                        <img src="{% static 'images/halopesa.png' %}" alt="Halo Pesa" class="payment-logo">
+                                    {% elif payment.provider == 'PayPal' %}
+                                        <img src="{% static 'images/paypal.png' %}" alt="PayPal" class="payment-logo">
+                                    {% elif payment.provider == 'Stripe' %}
+                                        <img src="{% static 'images/stripe.png' %}" alt="Stripe" class="payment-logo">
+                                    {% elif payment.provider == 'CRDB Bank' %}
+                                        <img src="{% static 'images/crdb.png' %}" alt="CRDB Bank" class="payment-logo">
+                                    {% elif payment.provider == 'Azam Pesa' %}
+                                        <img src="{% static 'images/azam.png' %}" alt="Azam Pesa" class="payment-logo">
+                                    {% elif payment.provider == 'Exim Bank' %}
+                                        <img src="{% static 'images/exim.png' %}" alt="Exim Bank" class="payment-logo">
+                                    {% elif payment.provider == 'NMB Bank' %}
+                                        <img src="{% static 'images/nmb.png' %}" alt="NMB Bank" class="payment-logo">
+                                    {% else %}
+                                        <span>{{ payment.provider }}</span>
+                                    {% endif %}
+                                    <span class="ms-2">{{ payment.method_name }} - {{ payment.account_details }}</span>
+                                </label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-success btn-lg" style="border-radius: 10px;">
+                            <i class="fas fa-check-circle me-2"></i>Confirm Booking
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Style for payment logos */
+    .payment-logo {
+        height: 50px;
+        width: auto;
+        margin-right: 10px;
+    }
+
+    /* Rounded buttons */
+    .btn-lg {
+        border-radius: 10px;
+    }
+</style>
+{% endblock %}

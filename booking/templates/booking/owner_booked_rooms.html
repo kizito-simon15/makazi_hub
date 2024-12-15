@@ -1,0 +1,126 @@
+{% extends 'owner_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-primary fw-bold mb-4"><i class="bi bi-house-fill me-2"></i>Booked Rooms by House</h2>
+
+    {% if houses_with_booked_rooms %}
+        {% for house_data in houses_with_booked_rooms %}
+        <div class="card mb-5 shadow-lg">
+            <!-- House Details -->
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-building me-2"></i>{{ house_data.house.house_name }}</h4>
+                <small>
+                    <i class="bi bi-geo-alt-fill me-1"></i>{{ house_data.house.region }}, {{ house_data.house.district }}, 
+                    {{ house_data.house.ward }}, {{ house_data.house.street }}
+                </small>
+            </div>
+            <div class="card-body">
+                <!-- House Photos Carousel -->
+                <div class="mb-4">
+                    <h5 class="text-secondary"><i class="bi bi-images me-2"></i>House Photos</h5>
+                    {% if house_data.photos %}
+                    <div id="houseCarousel{{ house_data.house.id }}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
+                        <div class="carousel-inner">
+                            {% for photo in house_data.photos %}
+                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                <img src="{{ photo.url }}" class="d-block w-100 rounded shadow" alt="House Photo">
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#houseCarousel{{ house_data.house.id }}" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#houseCarousel{{ house_data.house.id }}" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
+                    {% else %}
+                    <p class="text-warning"><i class="bi bi-exclamation-circle me-2"></i>No photos available for this house.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Agent Details -->
+                {% if house_data.agents %}
+                <div class="mb-4">
+                    <h5 class="text-secondary"><i class="bi bi-person-badge-fill me-2"></i>Agent Details</h5>
+                    <ul class="list-group">
+                        {% for agent in house_data.agents %}
+                        <li class="list-group-item">
+                            <strong><i class="bi bi-person-circle me-2"></i>Name:</strong> {{ agent.first_name }} {{ agent.last_name }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong><i class="bi bi-envelope me-2"></i>Email:</strong> {{ agent.email }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong><i class="bi bi-telephone me-2"></i>Phone:</strong> {{ agent.phone_number }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- Booked Rooms -->
+                <h5 class="text-secondary"><i class="bi bi-door-open-fill me-2"></i>Booked Rooms</h5>
+                {% if house_data.booked_rooms %}
+                    <div class="accordion" id="bookedRoomsAccordion{{ house_data.house.id }}">
+                        {% for item in house_data.booked_rooms %}
+                        <div class="accordion-item">
+                            <h6 class="accordion-header" id="roomHeader{{ item.booking.room.id }}">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#roomDetails{{ item.booking.room.id }}" aria-expanded="false" aria-controls="roomDetails{{ item.booking.room.id }}">
+                                    <i class="bi bi-door-closed me-2"></i>Room {{ item.booking.room.room_number }} - {{ item.booking.room.availability_status }}
+                                </button>
+                            </h6>
+                            <div id="roomDetails{{ item.booking.room.id }}" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    <!-- Room Details -->
+                                    <h6 class="text-secondary"><i class="bi bi-info-circle me-2"></i>Details</h6>
+                                    <ul class="list-group mb-3">
+                                        <li class="list-group-item"><strong><i class="bi bi-text-left me-2"></i>Description:</strong> {{ item.booking.room.description }}</li>
+                                        <li class="list-group-item"><strong><i class="bi bi-cash-coin me-2"></i>Rental Price:</strong> {{ item.booking.room.rental_price }} TZS</li>
+                                    </ul>
+
+                                    <!-- Room Photos Carousel -->
+                                    <h6 class="text-secondary"><i class="bi bi-images me-2"></i>Room Photos</h6>
+                                    {% if item.photos %}
+                                    <div id="roomCarousel{{ item.booking.room.id }}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
+                                        <div class="carousel-inner">
+                                            {% for photo in item.photos %}
+                                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                                <img src="{{ photo.url }}" class="d-block w-100 rounded shadow" alt="Room Photo">
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                        <button class="carousel-control-prev" type="button" data-bs-target="#roomCarousel{{ item.booking.room.id }}" data-bs-slide="prev">
+                                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                            <span class="visually-hidden">Previous</span>
+                                        </button>
+                                        <button class="carousel-control-next" type="button" data-bs-target="#roomCarousel{{ item.booking.room.id }}" data-bs-slide="next">
+                                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                            <span class="visually-hidden">Next</span>
+                                        </button>
+                                    </div>
+                                    {% else %}
+                                    <p class="text-warning"><i class="bi bi-exclamation-circle me-2"></i>No photos available for this room.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-warning"><i class="bi bi-exclamation-triangle me-2"></i>No booked rooms for this house.</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-warning text-center">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>No booked rooms found.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

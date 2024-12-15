@@ -1,0 +1,99 @@
+{% extends "owner_base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-primary fw-bold mb-4"><i class="bi bi-receipt me-2"></i>Create Bills</h2>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- House Selection -->
+        <div class="mb-4">
+            <h4 class="text-secondary"><i class="bi bi-house-fill me-2"></i>Select a House</h4>
+            {{ select_house_form.house }}
+        </div>
+
+        <!-- Bill Formset -->
+        <div id="bill-formset-container">
+            <h4 class="text-secondary mt-4"><i class="bi bi-pencil-square me-2"></i>Enter Bill Details</h4>
+            {{ bill_formset.management_form }}
+            {% for form in bill_formset %}
+            <div class="card mb-3 shadow-sm bill-form">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-2">
+                            {{ form.title.label_tag }}
+                            {{ form.title }}
+                        </div>
+                        <div class="col-md-2">
+                            {{ form.amount.label_tag }}
+                            {{ form.amount }}
+                        </div>
+                        <div class="col-md-2">
+                            {{ form.validity_period.label_tag }}
+                            {{ form.validity_period }}
+                        </div>
+                        <div class="col-md-3">
+                            {{ form.description.label_tag }}
+                            {{ form.description }}
+                        </div>
+                        <div class="col-md-3">
+                            {{ form.reference_number.label_tag }}
+                            {{ form.reference_number }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Add More Button -->
+        <div class="d-flex justify-content-between">
+            <button type="button" id="add-bill-form" class="btn btn-secondary"><i class="bi bi-plus-circle me-2"></i>Add More Bill</button>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-save me-2"></i>Save Bills</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const formsetContainer = document.getElementById("bill-formset-container");
+    const addFormButton = document.getElementById("add-bill-form");
+    let formIndex = {{ bill_formset.total_form_count }};
+
+    addFormButton.addEventListener("click", function () {
+        const emptyFormTemplate = `
+            <div class="card mb-3 shadow-sm">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label for="id_form-${formIndex}-title">Title:</label>
+                            <input type="text" name="form-${formIndex}-title" class="form-control" id="id_form-${formIndex}-title">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="id_form-${formIndex}-amount">Amount:</label>
+                            <input type="number" name="form-${formIndex}-amount" class="form-control" id="id_form-${formIndex}-amount">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="id_form-${formIndex}-validity_period">Validity Period:</label>
+                            <input type="text" name="form-${formIndex}-validity_period" class="form-control" id="id_form-${formIndex}-validity_period">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="id_form-${formIndex}-description">Description:</label>
+                            <textarea name="form-${formIndex}-description" class="form-control" id="id_form-${formIndex}-description"></textarea>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="id_form-${formIndex}-reference_number">Reference Number:</label>
+                            <input type="text" name="form-${formIndex}-reference_number" class="form-control" id="id_form-${formIndex}-reference_number">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        formsetContainer.insertAdjacentHTML("beforeend", emptyFormTemplate);
+
+        // Update TOTAL_FORMS in the management form
+        const totalFormsInput = document.querySelector("#id_form-TOTAL_FORMS");
+        totalFormsInput.value = ++formIndex;
+    });
+</script>
+{% endblock %}
