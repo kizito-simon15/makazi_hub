@@ -1,0 +1,554 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>{% block title %}MakaziHub - Client{% endblock %}</title>
+
+    <!-- Bootstrap CSS -->
+
+    <!-- Link to your manifest -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Optional Apple Touch Icon & iOS meta -->
+    <link rel="apple-touch-icon" href="/icons/apple-icon-180.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"/>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="..." crossorigin="anonymous"/>
+
+    <style>
+        :root {
+            --sidebar-bg: #2f3640;
+            --sidebar-text: #ecf0f1;
+            --sidebar-hover: #3f4753;
+            --topbar-bg: #2185d0;
+            --topbar-text: #ffffff;
+            --accent-color: #007BFF;
+            --content-bg: #f8f9fa;
+        }
+
+        body {
+            margin:0;
+            font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue",sans-serif;
+            background-color:var(--content-bg);
+            display:flex;
+            flex-direction:column;
+            height:100vh;
+        }
+
+        /* Sidebar off-screen by default */
+        .sidebar {
+            position:fixed;
+            top:0;
+            left:0;
+            width:250px;
+            height:100vh;
+            background-color:var(--sidebar-bg);
+            color:var(--sidebar-text);
+            padding:15px;
+            overflow-y:auto;
+            transform:translateX(-100%);
+            transition:transform 0.3s ease;
+            z-index:1100;
+        }
+        .sidebar.show {
+            transform:translateX(0);
+        }
+
+        .sidebar a {
+            color:var(--sidebar-text);
+            text-decoration:none;
+            display:flex;
+            align-items:center;
+            padding:10px;
+            margin-bottom:8px;
+            border-radius:10px;
+            transition:background-color 0.3s;
+        }
+        .sidebar a:hover {
+            background-color:var(--sidebar-hover);
+        }
+        .sidebar a i {
+            margin-right:10px;
+            font-size:1.2rem;
+        }
+
+        .topbar {
+            background-color:var(--topbar-bg);
+            color:var(--topbar-text);
+            padding:5px 15px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            position:fixed;
+            top:0;
+            left:0;
+            right:0;
+            height:40px;
+            z-index:1000;
+        }
+
+        .toggle-btn {
+            background:none;
+            border:none;
+            font-size:1.2rem;
+            color:var(--topbar-text);
+            cursor:pointer;
+            margin-right:5px;
+        }
+
+        .search-container {
+            position:relative;
+            max-width:200px;
+            flex:1;
+            display:flex;
+            justify-content:center;
+            margin:0 10px;
+        }
+        .search-container input {
+            width:100%;
+            padding:5px 30px 5px 10px;
+            border:1px solid #ddd;
+            border-radius:15px;
+            font-size:14px;
+            outline:none;
+        }
+        .search-container input:focus {
+            border-color:var(--accent-color);
+        }
+        .search-container .fa-search {
+            position:absolute;
+            right:10px;
+            top:50%;
+            transform:translateY(-50%);
+            color:#777;
+        }
+
+        .auth-icon {
+            position:relative;
+            cursor:pointer;
+            margin:0 10px;
+        }
+        .auth-icon i {
+            color:var(--topbar-text);
+            font-size:1.4rem;
+        }
+
+        .dropdown-menu {
+            display:block;
+            position:absolute;
+            right:0;
+            top:30px;
+            background:#fff;
+            box-shadow:0 8px 16px rgba(0,0,0,0.1);
+            border-radius:8px;
+            overflow:hidden;
+            z-index:2000;
+            opacity:0;
+            transform:translateY(-10px);
+            transition:opacity 0.3s ease, transform 0.3s ease;
+            pointer-events:none;
+        }
+        .dropdown-menu.show {
+            opacity:1;
+            transform:translateY(0);
+            pointer-events:auto;
+        }
+
+        .dropdown-menu a {
+            color:#333;
+            padding:10px 15px;
+            text-decoration:none;
+            font-size:14px;
+            display:block;
+        }
+        .dropdown-menu a:hover {
+            background:#f8f8f8;
+        }
+
+        .customize-icon {
+            color:var(--topbar-text);
+            font-size:1.2rem;
+            cursor:pointer;
+            margin-left:10px;
+            transition:transform 0.3s ease;
+        }
+        .customize-icon:hover {
+            transform:rotate(20deg);
+        }
+
+        .color-panel {
+            position:fixed;
+            top:50px;
+            right:20px;
+            background:#fff;
+            border-radius:10px;
+            box-shadow:0 8px 16px rgba(0,0,0,0.1);
+            padding:15px;
+            width:250px;
+            z-index:3000;
+            opacity:0;
+            transform:translateY(-10px);
+            transition:opacity 0.3s ease, transform 0.3s ease;
+            pointer-events:none;
+        }
+        .color-panel.show {
+            opacity:1;
+            transform:translateY(0);
+            pointer-events:auto;
+        }
+
+        .color-panel h5 {
+            margin-bottom:10px;
+            font-size:16px;
+            font-weight:600;
+        }
+        .color-panel .form-group {
+            margin-bottom:10px;
+        }
+        .color-panel label {
+            font-size:14px;
+            font-weight:500;
+            margin-bottom:5px;
+            display:inline-block;
+        }
+        .color-panel small {
+            display:block;
+            font-size:12px;
+            color:#666;
+            margin-bottom:5px;
+        }
+        .color-panel input[type="color"] {
+            width:100%;
+            border:none;
+            height:35px;
+            padding:0;
+            background:transparent;
+            cursor:pointer;
+        }
+        .color-panel button.save-colors {
+            background:var(--accent-color);
+            color:#fff;
+            border:none;
+            padding:8px 12px;
+            border-radius:5px;
+            cursor:pointer;
+            margin-top:10px;
+            width:100%;
+            font-size:14px;
+        }
+
+        .content {
+            margin-top:40px;
+            padding:20px;
+            overflow-y:auto;
+            flex:1;
+            background-color:var(--content-bg);
+        }
+
+        .bottombar {
+            position:fixed;
+            bottom:0;
+            left:0;
+            right:0;
+            height:50px;
+            background:var(--topbar-bg);
+            display:flex;
+            justify-content:space-around;
+            align-items:center;
+            z-index:1000;
+        }
+
+        .bottombar a {
+            color:#ffffff;
+            text-decoration:none;
+            font-size:1.2rem;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+        }
+        .bottombar a span {
+            font-size:0.7rem;
+            margin-top:2px;
+        }
+        .bottombar a:hover {
+            opacity:0.8;
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position:fixed;
+            top:0;
+            left:0;
+            right:0;
+            bottom:0;
+            background:rgba(255,255,255,0.8);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            z-index:2000;
+            opacity:0;
+            pointer-events:none;
+            transition:opacity 0.3s ease;
+        }
+        .loading-overlay.show {
+            opacity:1;
+            pointer-events:auto;
+        }
+
+        .spinner {
+            width:50px;
+            height:50px;
+            border:6px solid #ccc;
+            border-top-color:var(--accent-color);
+            border-radius:50%;
+            animation:spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {transform:rotate(360deg);}
+        }
+
+        @media (max-width:768px) {
+            .search-container {
+                max-width:120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="topbar" id="topbar">
+        <button class="toggle-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <div class="search-container">
+            <input type="text" id="search" placeholder="Search..." onkeyup="filterSidebar()">
+            <i class="fas fa-search"></i>
+        </div>
+        <div class="d-flex align-items-center">
+            <div class="auth-icon" onclick="toggleDropdown()">
+                <i class="fas fa-user-circle"></i>
+                <div class="dropdown-menu" id="authDropdown">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'logout' %}">Logout</a>
+                    {% else %}
+                        <a href="{% url 'login' %}">Login</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="customize-icon" onclick="toggleColorPanel()">
+                <i class="fas fa-paint-brush"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="user-profile d-flex flex-column align-items-center mb-4">
+            {% if user.is_authenticated and user.profile_image %}
+                <img src="{{ user.profile_image.url }}" alt="User Profile"
+                     class="img-fluid rounded-circle"
+                     style="width:80px;height:80px;object-fit:cover;">
+            {% else %}
+                <img src="{% static 'images/default.png' %}" alt="Default Profile"
+                     class="img-fluid rounded-circle"
+                     style="width:80px;height:80px;object-fit:cover;">
+            {% endif %}
+            <p class="mt-2 fw-bold" id="username">{{ user.username }}</p>
+        </div>
+        <a href="{% url 'admin_dashboard' %}" data-link="Home"><i class="fas fa-home"></i><span class="link-text">Home</span></a>
+        <a href="{% url 'admin_client_list' %}" data-link="Clients"><i class="fas fa-user"></i><span class="link-text">Clients</span></a>
+        <a href="{% url 'admin_agent_list' %}" data-link="Agents"><i class="fas fa-user"></i><span class="link-text">Agents</span></a>
+        <a href="{% url 'admin_owner_list' %}" data-link="Owners"><i class="fas fa-user"></i><span class="link-text">Owners</span></a>
+        <a href="{% url 'region_list' %}" data-link="Settings"><i class="fas fa-cog"></i><span class="link-text">Settings</span></a>
+    </div>
+
+    <div class="color-panel" id="colorPanel">
+        <h5>Customize Colors</h5>
+        <div class="form-group">
+            <label>Sidebar Background:</label>
+            <small>Changes the main background of the sidebar area.</small>
+            <input type="color" id="sidebarBgPicker" value="#2f3640">
+        </div>
+        <div class="form-group">
+            <label>Sidebar Text:</label>
+            <small>Adjusts the color of sidebar text and icons.</small>
+            <input type="color" id="sidebarTextPicker" value="#ecf0f1">
+        </div>
+        <div class="form-group">
+            <label>Sidebar Hover:</label>
+            <small>Color shown when hovering over sidebar links.</small>
+            <input type="color" id="sidebarHoverPicker" value="#3f4753">
+        </div>
+        <div class="form-group">
+            <label>Topbar Background:</label>
+            <small>Sets the background color of the top navigation bar.</small>
+            <input type="color" id="topbarBgPicker" value="#2185d0">
+        </div>
+        <div class="form-group">
+            <label>Accent Color:</label>
+            <small>Affects highlights like the search field border on focus.</small>
+            <input type="color" id="accentColorPicker" value="#007BFF">
+        </div>
+        <button class="save-colors" onclick="saveColors()">Save Colors</button>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="content" id="content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <div class="bottombar">
+        <a href="{% url 'admin_dashboard' %}">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="{% url 'admin_client_list' %}">
+            <i class="fas fa-user"></i>
+            <span>Clients</span>
+        </a>
+        <a href="{% url 'admin_agent_list' %}">
+            <i class="fas fa-user"></i>
+            <span>Agents</span>
+        </a>
+        <a href="{% url 'admin_owner_list' %}">
+            <i class="fas fa-user"></i>
+            <span>Owners</span>
+        </a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Load initial state from localStorage for colors
+        window.addEventListener('DOMContentLoaded', () => {
+            const storedColors = localStorage.getItem('clientColors');
+            if (storedColors) {
+                const colors = JSON.parse(storedColors);
+                applyColors(colors);
+
+                // Update color pickers if present
+                const sbBg = document.getElementById('sidebarBgPicker');
+                if (sbBg) {
+                    document.getElementById('sidebarBgPicker').value = colors.sidebarBg;
+                    document.getElementById('sidebarTextPicker').value = colors.sidebarText;
+                    document.getElementById('sidebarHoverPicker').value = colors.sidebarHover;
+                    document.getElementById('topbarBgPicker').value = colors.topbarBg;
+                    document.getElementById('accentColorPicker').value = colors.accentColor;
+                }
+            }
+
+            // Add event listener to all internal links to show loading overlay
+            const links = document.querySelectorAll('a[href]:not([href^="#"])');
+            links.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Show loading overlay when navigating
+                    if (link.target !== "_blank" && link.href.indexOf('javascript:') === -1) {
+                        showLoadingOverlay();
+                    }
+                });
+            });
+        });
+
+        window.addEventListener('load', hideLoadingOverlay);
+
+        function showLoadingOverlay() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) overlay.classList.add('show');
+        }
+
+        function hideLoadingOverlay() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) overlay.classList.remove('show');
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            if (!sidebar) return;
+
+            if (sidebar.classList.contains('show')) {
+                sidebar.classList.remove('show');
+                localStorage.setItem('clientSidebarCollapsed', 'true');
+            } else {
+                sidebar.classList.add('show');
+                localStorage.setItem('clientSidebarCollapsed', 'false');
+            }
+        }
+
+        function toggleDropdown() {
+            const dropdown = document.getElementById('authDropdown');
+            if (dropdown) {
+                dropdown.classList.toggle('show');
+            }
+        }
+
+        function filterSidebar() {
+            const searchInput = document.getElementById('search');
+            const query = searchInput ? searchInput.value.toLowerCase() : '';
+            const links = document.querySelectorAll('.sidebar a');
+            if (!links) return;
+
+            links.forEach(link => {
+                const text = link.getAttribute('data-link') ? link.getAttribute('data-link').toLowerCase() : '';
+                link.style.display = text.includes(query) ? 'flex' : 'none';
+            });
+        }
+
+        // Close dropdown and color panel when clicking outside
+        window.onclick = function(event) {
+            const dropdown = document.getElementById('authDropdown');
+            const colorPanel = document.getElementById('colorPanel');
+            if (dropdown && !event.target.closest('.auth-icon')) {
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+            if (colorPanel && !event.target.closest('.customize-icon') && !colorPanel.contains(event.target)) {
+                if (colorPanel.classList.contains('show')) {
+                    colorPanel.classList.remove('show');
+                }
+            }
+        }
+
+        function toggleColorPanel() {
+            const colorPanel = document.getElementById('colorPanel');
+            if (colorPanel) {
+                colorPanel.classList.toggle('show');
+            }
+        }
+
+        function saveColors() {
+            const sbBg = document.getElementById('sidebarBgPicker');
+            if (!sbBg) return;
+
+            const sidebarBg = document.getElementById('sidebarBgPicker').value;
+            const sidebarText = document.getElementById('sidebarTextPicker').value;
+            const sidebarHover = document.getElementById('sidebarHoverPicker').value;
+            const topbarBg = document.getElementById('topbarBgPicker').value;
+            const accentColor = document.getElementById('accentColorPicker').value;
+
+            const colors = {
+                sidebarBg, sidebarText, sidebarHover, topbarBg, accentColor
+            };
+
+            localStorage.setItem('clientColors', JSON.stringify(colors));
+            applyColors(colors);
+        }
+
+        function applyColors(colors) {
+            if (!colors) return;
+            document.documentElement.style.setProperty('--sidebar-bg', colors.sidebarBg);
+            document.documentElement.style.setProperty('--sidebar-text', colors.sidebarText);
+            document.documentElement.style.setProperty('--sidebar-hover', colors.sidebarHover);
+            document.documentElement.style.setProperty('--topbar-bg', colors.topbarBg);
+            document.documentElement.style.setProperty('--topbar-text', '#ffffff');
+            document.documentElement.style.setProperty('--accent-color', colors.accentColor);
+        }
+    </script>
+</body>
+</html>

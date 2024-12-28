@@ -1,0 +1,593 @@
+{% extends 'website_base.html' %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ house.house_name }} - Full Details</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #007aff;
+            --text-color: #333;
+            --muted-text: #555;
+            --card-bg: #ffffff;
+            --card-border: #ddd;
+            --card-radius: 15px;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            --background-gradient: linear-gradient(135deg, #ffa8e8, #a0e1ff, #baffc9);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: var(--background-gradient);
+            background-size: 200% 200%;
+            animation: gradientShift 8s ease infinite, fadeIn 0.7s ease forwards;
+            opacity: 0;
+            color: var(--text-color);
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 40px;
+            color: var(--primary-color);
+            text-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            margin: 30px 0 15px;
+            font-weight: 600;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title i {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+        }
+
+        .blocks-grid, .rooms-grid, .bottom-grid {
+            display: grid;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .blocks-grid { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+        .rooms-grid { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+        .bottom-grid { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+
+        .block, .room-block {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--card-radius);
+            position: relative;
+            overflow: hidden;
+            box-sizing: border-box;
+            padding: 10px;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            opacity:0;transform:translateY(10px);
+            animation: fadeUp 0.5s ease forwards;
+        }
+
+        @keyframes fadeUp {
+            to {opacity:1;transform:translateY(0);}
+        }
+
+        .block:hover, .room-block:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .block-content, .room-block-content {
+            font-size: 0.95rem;
+        }
+
+        .block-content p, .room-block p {
+            margin: 5px 0;
+            line-height: 1.4;
+        }
+
+        .block-content strong, .room-block strong {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .room-block h3 {
+            font-size: 1.1rem;
+            font-weight:600;
+            color:var(--primary-color);
+            margin-bottom:8px;
+        }
+
+        .bill-item {
+            border:1px solid #ccc;
+            border-radius:8px;
+            padding:8px;
+            background:#fdfdfd;
+            margin-bottom:5px;
+            font-size: 0.9rem;
+        }
+
+        /* Slider styles */
+        .slider-container {
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            height: 200px;
+        }
+
+        .slider-slide {
+            display: none;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top:0; left:0;
+        }
+
+        .slider-slide.active {
+            display: block;
+        }
+
+        .slider-slide img,
+        .slider-slide video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+            border-radius:10px;
+        }
+
+        .slider-caption {
+            font-size: 0.8rem;
+            color: var(--muted-text);
+            background: rgba(255,255,255,0.85);
+            padding: 4px;
+            text-align: center;
+            position: absolute;
+            bottom:0;
+            width:100%;
+            border-bottom-left-radius:10px;
+            border-bottom-right-radius:10px;
+        }
+
+        /* Slider buttons */
+        .slider-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.4);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 2;
+            transition: background 0.3s;
+        }
+
+        .slider-btn:hover {
+            background: rgba(0,0,0,0.6);
+        }
+
+        .slider-btn:focus {
+            outline: none;
+        }
+
+        .slider-btn-prev {
+            left: 10px;
+        }
+
+        .slider-btn-next {
+            right: 10px;
+        }
+
+        .slider-btn i {
+            font-size: 0.8rem;
+        }
+
+        /* Modal for full-size image */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left:0; top:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.8);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+
+        .modal-content img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        .close-modal {
+            position:absolute;
+            top:15px;
+            right:15px;
+            background: rgba(0,0,0,0.5);
+            color: #fff;
+            width: 30px; height:30px;
+            border:none;
+            border-radius:50%;
+            cursor:pointer;
+            display:flex;align-items:center;justify-content:center;
+        }
+
+        .close-modal:hover {
+            background: rgba(0,0,0,0.7);
+        }
+
+        /* Book Now button styling */
+        .book-now-btn {
+            border-radius:20px;
+            background: linear-gradient(135deg, #28a745, #85d96b);
+            border:none;
+            color:#fff;
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            padding:0.4rem 1rem;
+            font-weight:600;
+            font-size:0.9rem;
+            text-decoration:none;
+            cursor:pointer;
+            margin-top:10px;
+            transition:background 0.2s ease-in-out;
+        }
+
+        .book-now-btn i {
+            font-size:1rem;
+        }
+
+        .book-now-btn:hover {
+            background: linear-gradient(135deg, #1e7e34, #70c558);
+        }
+
+        /* Register error overlay */
+        .register-error-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .error-container {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            max-width: 350px;
+            width: 90%;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .error-container h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .error-container p {
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+            color: #555;
+        }
+
+        .error-container a.btn {
+            border-radius: 20px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            border: none;
+            color: #fff;
+            transition: background 0.2s ease-in-out;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.2rem;
+            text-decoration: none;
+            font-size:0.9rem;
+        }
+
+        .error-container a.btn:hover {
+            background: linear-gradient(135deg, #5c0eb5, #1e64d4);
+            text-decoration: none;
+            color: #fff;
+        }
+
+        .error-container i {
+            font-size: 1.2rem;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>{{ house.house_name }}</h1>
+
+    <h2 class="section-title"><i class="bi bi-info-circle"></i> Top Blocks</h2>
+    <div class="blocks-grid">
+        <!-- House details block -->
+        <div class="block">
+            <div class="block-content">
+                <p><strong>Owner:</strong> {{ house.owner.user.username }}</p>
+                <p><strong>Location:</strong> {{ house.region.name }}, {{ house.district.name }}, {{ house.ward.name }}, {{ house.street.name }} - #{{ house.house_number }}</p>
+                <p><strong>Furnishing:</strong> {{ house.furnishing_status }}</p>
+                <p><strong>Type:</strong> {{ house.house_type }}</p>
+                <p><strong>Amenities:</strong> {{ house.amenities|default:"N/A" }}</p>
+                <p><strong>Utilities:</strong> {{ house.utilities_included|default:"N/A" }}</p>
+                <p><strong>Rules:</strong> {{ house.rules_and_restrictions|default:"N/A" }}</p>
+                <p><strong>Contact:</strong> {{ house.contact_information }}</p>
+            </div>
+        </div>
+
+        <!-- House profile picture block -->
+        <div class="block">
+            <div class="block-content" style="display:flex;flex-direction:column;align-items:center;">
+                <strong>Profile Picture</strong>
+                {% if house.profile_picture %}
+                <img src="{{ house.profile_picture.url }}" alt="House Profile" style="width:80%;border-radius:10px;margin-top:10px;">
+                {% else %}
+                <p class="text-muted" style="margin-top:10px;">No profile picture.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- House medias block -->
+        <div class="block">
+            {% if combined_house_medias %}
+            <div class="slider-container">
+                {% for m in combined_house_medias %}
+                <div class="slider-slide{% if forloop.first %} active{% endif %}">
+                    {% if m.type == 'photo' %}
+                        <img src="{{ m.file }}" alt="House Media" class="enlargeable-photo">
+                    {% else %}
+                        <video controls>
+                            <source src="{{ m.file }}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    {% endif %}
+                    {% if m.caption %}
+                    <div class="slider-caption">{{ m.caption }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                <button class="slider-btn slider-btn-prev"><i class="bi bi-chevron-left"></i></button>
+                <button class="slider-btn slider-btn-next"><i class="bi bi-chevron-right"></i></button>
+            </div>
+            {% else %}
+            <div class="block-content">
+                <p class="text-muted">No house media.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if rooms_data %}
+    <h2 class="section-title"><i class="bi bi-door-open"></i> Rooms</h2>
+    <div class="rooms-grid">
+        {% for rd in rooms_data %}
+        <div class="room-block">
+            <h3>Room {{ rd.room.room_number }} - {{ rd.room.availability_status }}</h3>
+            <p><strong>Price:</strong> {{ rd.room.rental_price }} TZS</p>
+            <p><strong>Description:</strong> {{ rd.room.description|default:"N/A" }}</p>
+
+            {% if rd.room_medias %}
+            <div class="slider-container">
+                {% for rm in rd.room_medias %}
+                <div class="slider-slide{% if forloop.first %} active{% endif %}">
+                    {% if rm.type == 'photo' %}
+                        <img src="{{ rm.file }}" alt="Room Media" class="enlargeable-photo">
+                    {% else %}
+                        <video controls>
+                            <source src="{{ rm.file }}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    {% endif %}
+                    {% if rm.caption %}
+                    <div class="slider-caption">{{ rm.caption }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                <button class="slider-btn slider-btn-prev"><i class="bi bi-chevron-left"></i></button>
+                <button class="slider-btn slider-btn-next"><i class="bi bi-chevron-right"></i></button>
+            </div>
+            {% endif %}
+
+            {% if rd.promotions %}
+            <div style="margin-top:5px; font-size:0.9rem;">
+                {% for rp in rd.promotions %}
+                <p><strong>Promotion:</strong> {{ rp.promotion.description|default:"N/A" }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if agents or bills %}
+    <h2 class="section-title"><i class="bi bi-people-fill"></i> Agents & Bills</h2>
+    <div class="bottom-grid">
+        {% if agents %}
+        <div class="block">
+            <div class="block-content">
+                <strong>Assigned Agents</strong>
+                {% for agent in agents %}
+                <hr style="margin:5px 0;">
+                {% if agent.profile_picture %}
+                <img src="{{ agent.profile_picture.url }}" alt="Agent" style="width:70px;height:70px;object-fit:cover;border-radius:50%;display:block;margin-bottom:5px;">
+                {% else %}
+                <p class="text-muted">No agent picture</p>
+                {% endif %}
+                <p><strong>Name:</strong> {{ agent.first_name }} {{ agent.last_name }}</p>
+                <p><strong>Email:</strong> {{ agent.email }}</p>
+                <p><strong>Phone:</strong> {{ agent.phone_number }}</p>
+                <p><strong>Status:</strong> {{ agent.status }}</p>
+
+                <!-- Book Now button -->
+                <button class="book-now-btn" onclick="showRegisterError()">
+                    <i class="bi bi-calendar-check"></i> Book Now
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if bills %}
+        <div class="block">
+            <div class="block-content">
+                <strong>Bills</strong>
+                {% for b in bills %}
+                <div class="bill-item">
+                    <p><strong>{{ b.title }}</strong> ({{ b.amount }} TZS)</p>
+                    <p>{{ b.description|default:"No description" }}</p>
+                    <p><strong>Valid:</strong> {{ b.validity_period }}</p>
+                    {% if b.reference_number %}
+                    <p><strong>Ref:</strong> {{ b.reference_number }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modal for full-size image -->
+<div class="modal" id="imageModal">
+    <div class="modal-content">
+        <button class="close-modal"><i class="bi bi-x"></i></button>
+        <img id="modalImage" src="" alt="Full size">
+    </div>
+</div>
+
+<!-- Register error overlay -->
+<div class="register-error-overlay" id="registerErrorOverlay">
+    <div class="error-container">
+        <h2><i class="bi bi-exclamation-circle me-2"></i>Access Restricted</h2>
+        <p>You must register first to access this service. <br> Please register to continue.</p>
+        <a href="{% url 'register' %}" class="btn btn-primary">
+            <i class="bi bi-person-plus"></i> Register Here
+        </a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Sliders
+    const sliders = document.querySelectorAll('.slider-container');
+    sliders.forEach(slider => {
+        const slides = slider.querySelectorAll('.slider-slide');
+        const prevBtn = slider.querySelector('.slider-btn-prev');
+        const nextBtn = slider.querySelector('.slider-btn-next');
+        let currentIndex = 0;
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === index);
+            });
+        }
+
+        function nextSlide() {
+            currentIndex = (currentIndex + 1) % slides.length;
+            showSlide(currentIndex);
+        }
+
+        function prevSlideFunc() {
+            currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+            showSlide(currentIndex);
+        }
+
+        if (slides.length > 1) {
+            prevBtn.addEventListener('click', prevSlideFunc);
+            nextBtn.addEventListener('click', nextSlide);
+        } else {
+            if (prevBtn) prevBtn.style.display = 'none';
+            if (nextBtn) nextBtn.style.display = 'none';
+        }
+    });
+
+    // Modal for full-size image
+    const modal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+    const closeModalBtn = modal.querySelector('.close-modal');
+
+    closeModalBtn.addEventListener('click', () => {
+        modal.classList.remove('active');
+    });
+
+    document.querySelectorAll('.enlargeable-photo').forEach(img => {
+        img.addEventListener('click', () => {
+            modalImage.src = img.src;
+            modal.classList.add('active');
+        });
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.remove('active');
+        }
+    });
+});
+
+function showRegisterError() {
+    document.getElementById('registerErrorOverlay').style.display = 'flex';
+}
+</script>
+</body>
+</html>
+{% endblock %}

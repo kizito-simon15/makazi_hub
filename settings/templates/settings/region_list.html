@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* Pastel gradients for different cards using nth-child selectors */
+    .row.g-4 > div:nth-child(4n+1) .card {
+        background: linear-gradient(135deg, #fdfbfb, #ebedee);
+    }
+    .row.g-4 > div:nth-child(4n+2) .card {
+        background: linear-gradient(135deg, #fcf6bd, #c2e9fb);
+    }
+    .row.g-4 > div:nth-child(4n+3) .card {
+        background: linear-gradient(135deg, #e0c3fc, #8ec5fc);
+    }
+    .row.g-4 > div:nth-child(4n+4) .card {
+        background: linear-gradient(135deg, #fbc2eb, #a6c1ee);
+    }
+
+    /* Fade-in animation for the cards */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    .card {
+        border-radius: 20px;
+        width: 100%;
+        height: 250px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        opacity: 0;
+        animation: fadeIn 0.5s ease forwards;
+    }
+
+    /* Hover animation: slight scale and deeper shadow */
+    .card:hover {
+        transform: scale(1.03);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card-body {
+        color: #333;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        padding: 0.75rem;
+    }
+
+    .scroll-container {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        font-size: 0.9rem;
+        padding-right: 0.5rem;
+    }
+
+    .card-title a {
+        color: #333;
+        text-decoration: none;
+    }
+
+    .card-title a:hover {
+        text-decoration: underline;
+    }
+
+    h1, h2, h3, h4, h5 {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    h1 {
+        font-weight: 700;
+        color:#333;
+        text-shadow:1px 1px 3px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+        font-weight:600;
+        font-size:1.1rem;
+        margin-bottom:0.5rem;
+    }
+
+    h3 {
+        font-size:0.95rem;
+        font-weight:600;
+        margin-top:0.3rem;
+    }
+
+    h4 {
+        font-size:0.85rem;
+        font-weight:600;
+        margin-top:0.3rem;
+    }
+
+    h5 {
+        font-size:0.8rem;
+        font-weight:600;
+        margin-top:0.2rem;
+    }
+
+    .text-muted {
+        font-size:0.8rem;
+    }
+
+    /* Style for the action icons (update/delete) */
+    .action-icons {
+        margin-left: 0.5rem;
+        font-size:0.9rem;
+    }
+    .action-icons a {
+        color:#666;
+        margin-left: 0.3rem;
+        text-decoration:none;
+    }
+    .action-icons a:hover {
+        color:#000;
+    }
+
+</style>
+
+<div class="container py-5">
+    <h1 class="text-center mb-4">
+        <i class="bi bi-globe" style="font-size:2rem; color:#5a5;"></i><br>
+        All Regions
+    </h1>
+    <!-- Button for creating a new region -->
+    <div class="text-center mb-4">
+        <a href="{% url 'create_region' %}" class="btn btn-primary btn-lg" style="border-radius:10px; font-weight:600;">
+            <i class="bi bi-plus-circle"></i> Add Region
+        </a>
+    </div>
+
+    <div class="row g-4">
+        {% for region in regions %}
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 d-flex justify-content-center">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="mb-2 card-title d-flex align-items-center">
+                        <a href="{% url 'create_district' region.pk %}">
+                            <i class="bi bi-geo-alt-fill" style="color:#5a5;"></i> {{ region.name }}
+                        </a>
+                        <!-- Update/Delete icons for Region -->
+                        <span class="action-icons">
+                            <a href="{% url 'update_region' region.pk %}" title="Update Region">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'delete_region' region.pk %}" title="Delete Region">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </span>
+                    </h2>
+                    <div class="scroll-container">
+                        {% if region.districts.all %}
+                            <h3><i class="bi bi-geo-alt" style="color:#5a5;"></i> Districts:</h3>
+                            <ul class="list-unstyled ms-3 mb-1">
+                                {% for district in region.districts.all %}
+                                <li class="mb-2">
+                                    <strong>
+                                        <a href="{% url 'create_ward' region.pk district.pk %}" class="text-decoration-none" style="color:#333;">
+                                            {{ district.name }}
+                                        </a>
+                                        <!-- Update/Delete icons for District -->
+                                        <span class="action-icons">
+                                            <a href="{% url 'update_district' region.pk district.pk %}" title="Update District">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="{% url 'delete_district' region.pk district.pk %}" title="Delete District">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </span>
+                                    </strong>
+                                    {% if district.wards.all %}
+                                        <h4><i class="bi bi-signpost" style="color:#5a5;"></i> Wards:</h4>
+                                        <ul class="list-unstyled ms-3 mb-1">
+                                            {% for ward in district.wards.all %}
+                                            <li class="mb-1">
+                                                <strong>
+                                                    <a href="{% url 'create_street' region.pk district.pk ward.pk %}" class="text-decoration-none" style="color:#333;">
+                                                        {{ ward.name }}
+                                                    </a>
+                                                    <!-- Update/Delete icons for Ward -->
+                                                    <span class="action-icons">
+                                                        <a href="{% url 'update_ward' region.pk district.pk ward.pk %}" title="Update Ward">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </a>
+                                                        <a href="{% url 'delete_ward' region.pk district.pk ward.pk %}" title="Delete Ward">
+                                                            <i class="bi bi-trash"></i>
+                                                        </a>
+                                                    </span>
+                                                </strong>
+                                                {% if ward.streets.all %}
+                                                    <h5><i class="bi bi-pin-map-fill" style="color:#5a5;"></i> Streets:</h5>
+                                                    <ul class="list-unstyled ms-3 mb-1">
+                                                        {% for street in ward.streets.all %}
+                                                        <li>
+                                                            {{ street.name }}
+                                                            <!-- Update/Delete icons for Street -->
+                                                            <span class="action-icons">
+                                                                <a href="{% url 'update_street' region.pk district.pk ward.pk street.pk %}" title="Update Street">
+                                                                    <i class="bi bi-pencil"></i>
+                                                                </a>
+                                                                <a href="{% url 'delete_street' region.pk district.pk ward.pk street.pk %}" title="Delete Street">
+                                                                    <i class="bi bi-trash"></i>
+                                                                </a>
+                                                            </span>
+                                                        </li>
+                                                        {% empty %}
+                                                        <li class="text-muted">No streets found.</li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                {% else %}
+                                                    <p class="text-muted">No streets found.</p>
+                                                {% endif %}
+                                            </li>
+                                            {% empty %}
+                                            <li class="text-muted">No wards found.</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        <p class="text-muted">No wards found.</p>
+                                    {% endif %}
+                                </li>
+                                {% empty %}
+                                <li class="text-muted">No districts found.</li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted">No districts found.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info text-center" style="font-size:1rem;">
+                No regions found.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

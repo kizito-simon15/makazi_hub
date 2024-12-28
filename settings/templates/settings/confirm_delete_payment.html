@@ -1,0 +1,30 @@
+{% extends 'owner_base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg">
+        <div class="card-header bg-danger text-white">
+            <h2 class="text-center"><i class="fas fa-exclamation-circle me-2"></i>Confirm Delete</h2>
+        </div>
+        <div class="card-body text-center">
+            <p class="lead">
+                Are you sure you want to delete the payment method for 
+                <strong>{{ payment.method_name }}</strong> provided by 
+                <strong>{{ payment.provider }}</strong>?
+            </p>
+            <p class="text-danger"><strong>This action cannot be undone.</strong></p>
+        </div>
+        <div class="card-footer text-center">
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-lg">
+                    <i class="fas fa-trash-alt me-2"></i>Confirm Delete
+                </button>
+                <a href="{% url 'payments_list' %}" class="btn btn-secondary btn-lg">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

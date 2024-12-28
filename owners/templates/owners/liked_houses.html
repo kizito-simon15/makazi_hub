@@ -1,0 +1,177 @@
+{% extends 'client_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-primary fw-bold mb-4"><i class="fas fa-heart me-2"></i>My Liked Houses</h2>
+
+    <!-- Display Django Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if houses_with_photos %}
+        {% for entry in houses_with_photos %}
+        <div class="card mb-4 shadow-lg">
+            <!-- House Header with Like Button -->
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="mb-0">
+                        <a href="{% url 'client_house_details' entry.house.id %}" class="text-white text-decoration-none">
+                            {{ entry.house.house_name }}
+                        </a>
+                        <span class="text-light">by {{ entry.house.owner.first_name }} {{ entry.house.owner.surname }}</span>
+                    </h3>
+                    <p class="mb-0">
+                        <i class="fas fa-map-marker-alt me-2"></i>{{ entry.house.region }},
+                        {{ entry.house.district }},
+                        {{ entry.house.ward }}
+                    </p>
+                </div>
+                <!-- Like Button as a Form to Unlike -->
+                <form action="{% url 'toggle_house_like' house_id=entry.house.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-like" aria-label="{% if entry.is_liked %}Unlike{% else %}Like{% endif %} House">
+                        <i class="fas fa-heart{% if entry.is_liked %} text-danger{% else %} text-white{% endif %}"></i>
+                    </button>
+                </form>
+            </div>
+            <div class="card-body">
+                <!-- House Details -->
+                <div class="mb-4">
+                    <h5><i class="fas fa-info-circle me-2 text-primary"></i>House Details</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><i class="fas fa-map-marker-alt me-2 text-danger"></i><strong>Region:</strong> {{ entry.house.region }}</li>
+                        <li class="list-group-item"><i class="fas fa-city me-2 text-info"></i><strong>District:</strong> {{ entry.house.district }}</li>
+                        <li class="list-group-item"><i class="fas fa-compass me-2 text-success"></i><strong>Ward:</strong> {{ entry.house.ward }}</li>
+                        <li class="list-group-item"><i class="fas fa-road me-2 text-warning"></i><strong>Street:</strong> {{ entry.house.street }}</li>
+                        <li class="list-group-item"><i class="fas fa-home me-2 text-primary"></i><strong>House Number:</strong> {{ entry.house.house_number }}</li>
+                        <li class="list-group-item"><i class="fas fa-couch me-2 text-secondary"></i><strong>Furnishing Status:</strong> {{ entry.house.furnishing_status }}</li>
+                        <li class="list-group-item"><i class="fas fa-tools me-2 text-dark"></i><strong>Amenities:</strong> {{ entry.house.amenities }}</li>
+                        <li class="list-group-item"><i class="fas fa-lightbulb me-2 text-warning"></i><strong>Utilities Included:</strong> {{ entry.house.utilities_included }}</li>
+                        <li class="list-group-item"><i class="fas fa-building me-2 text-success"></i><strong>House Type:</strong> {{ entry.house.house_type }}</li>
+                        <li class="list-group-item"><i class="fas fa-paint-brush me-2 text-info"></i><strong>Flooring & Finishing:</strong> {{ entry.house.flooring_and_finishing }}</li>
+                        <li class="list-group-item"><i class="fas fa-school me-2 text-danger"></i><strong>Proximity Information:</strong> {{ entry.house.proximity_information }}</li>
+                        <li class="list-group-item"><i class="fas fa-ban me-2 text-primary"></i><strong>Rules & Restrictions:</strong> {{ entry.house.rules_and_restrictions }}</li>
+                    </ul>
+                </div>
+
+                <!-- Carousel for House Video and Photos -->
+                <div id="carouselHouse{{ entry.house.id }}" class="carousel slide mb-3" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        {% if entry.house.house_video %}
+                        <div class="carousel-item active">
+                            <video class="d-block w-100" controls style="max-height: 300px; border-radius: 10px;">
+                                <source src="{{ entry.house.house_video.url }}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                        {% endif %}
+                        {% for photo in entry.house_photos %}
+                        <div class="carousel-item {% if not entry.house.house_video and forloop.first %}active{% endif %}">
+                            <img src="{{ photo.url }}" class="d-block w-100" style="max-height: 300px; object-fit: cover; border-radius: 10px;">
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselHouse{{ entry.house.id }}" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselHouse{{ entry.house.id }}" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+
+                <!-- Room Details -->
+                <div>
+                    <h5><i class="fas fa-door-open me-2 text-primary"></i>Rooms</h5>
+                    {% for room_entry in entry.rooms_with_photos %}
+                    <div class="mb-3">
+                        <h6><i class="fas fa-bed me-2 text-success"></i>Room {{ room_entry.room.room_number }}: {{ room_entry.room.description }}</h6>
+                        <p><i class="fas fa-tag me-2 text-warning"></i>Price: {{ room_entry.room.rental_price }} TZS</p>
+                        <!-- Carousel for Room Media -->
+                        <div id="carouselRoom{{ room_entry.room.id }}" class="carousel slide mb-3" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                {% if room_entry.room.room_video %}
+                                <div class="carousel-item active">
+                                    <video class="d-block w-100" controls style="max-height: 200px; border-radius: 10px;">
+                                        <source src="{{ room_entry.room.room_video.url }}" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                </div>
+                                {% endif %}
+                                {% for photo in room_entry.photos %}
+                                <div class="carousel-item {% if not room_entry.room.room_video and forloop.first %}active{% endif %}">
+                                    <img src="{{ photo.url }}" class="d-block w-100" style="max-height: 200px; object-fit: cover; border-radius: 10px;">
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselRoom{{ room_entry.room.id }}" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#carouselRoom{{ room_entry.room.id }}" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div>
+
+                        <!-- Book Room Button -->
+                        <div class="text-end">
+                            <a href="{% url 'create_booking' room_entry.room.id %}" class="btn btn-primary">
+                                <i class="fas fa-calendar-check me-2"></i>Book Room
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-warning text-center" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>You have not liked any houses yet.
+        </div>
+    {% endif %}
+</div>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Custom Styles (Optional) -->
+<style>
+    .btn-like {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        font-size: 1.5rem;
+    }
+    .btn-like:hover {
+        opacity: 0.7;
+    }
+
+    .list-group-item {
+        border: none;
+        padding-left: 0;
+    }
+
+    .list-group-item strong {
+        color: #333;
+    }
+
+    .carousel-item img,
+    .carousel-item video {
+        border-radius: 10px;
+    }
+
+    .fas {
+        vertical-align: middle;
+    }
+</style>
+{% endblock %}

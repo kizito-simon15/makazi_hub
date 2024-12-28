@@ -1,0 +1,327 @@
+{% extends 'base.html' %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Users Overview</title>
+
+  <!-- Bootstrap CSS -->
+  <link 
+    rel="stylesheet" 
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" 
+    integrity="sha384-9ndCyUa1Y9+M3QFutpo8rN+ClJs9WczSYWjBsIOeZCRKh9BMfQvp6CoXxwAHQq2X" 
+    crossorigin="anonymous"
+  >
+  <!-- Bootstrap Icons -->
+  <link 
+    rel="stylesheet" 
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+  >
+
+  <style>
+    /************************************
+     1. Body & Background
+    *************************************/
+    /* Prevent horizontal scrolling on the entire page */
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    /* iOS-like pastel gradient background */
+    body {
+      background: linear-gradient(135deg, #ffa8e8, #a0e1ff, #baffc9);
+      background-size: 200% 200%;
+      animation: gradientShift 10s ease infinite;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #333;
+      padding: 20px;
+    }
+
+    /* Smooth animated background shift */
+    @keyframes gradientShift {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .container {
+      margin-top: 50px;
+    }
+
+    /************************************
+     2. Headings
+    *************************************/
+    h1, h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #444;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      font-size: 2.2rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+
+    /************************************
+     3. Table Container (Glassmorphic)
+    *************************************/
+    .table-container {
+      background: rgba(255, 255, 255, 0.7); /* glass-like */
+      backdrop-filter: blur(15px);
+      border-radius: 20px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+      padding: 20px;
+      margin-bottom: 40px;
+    }
+
+    .table-scroll {
+      width: 100%;
+      overflow-x: auto; /* Horizontal scroll for wide tables */
+    }
+
+    .table-scroll table {
+      white-space: nowrap; /* Prevent wrapping of columns */
+    }
+
+    /************************************
+     4. Table Styling
+    *************************************/
+    .table {
+      margin: 0;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    thead th {
+      background: #a0e1ff;
+      color: #333;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      padding: 15px;
+      border-bottom: 2px solid #2575fc;
+      position: relative;
+    }
+
+    /* Add subtle icon styling in headers */
+    .table th i {
+      margin-right: 4px;
+      color: #2575fc;
+    }
+
+    .table tbody tr:nth-child(odd) {
+      background: #fafafa;
+    }
+
+    .table tbody tr:nth-child(even) {
+      background: #f0f0f0;
+    }
+
+    .table tbody tr:hover {
+      background: #d3e8ff; /* subtle highlight */
+    }
+
+    .no-data {
+      text-align: center;
+      font-size: 0.95rem;
+      color: #666;
+    }
+
+    /************************************
+     5. Icons & Status
+    *************************************/
+    .allowed-true {
+      color: #28a745;  /* green */
+      font-size: 1.2rem;
+    }
+
+    .allowed-false {
+      color: #dc3545;  /* red */
+      font-size: 1.2rem;
+    }
+
+    /************************************
+     6. Buttons & Actions
+    *************************************/
+    .btn-action {
+      font-size: 0.85rem;
+      padding: 5px 10px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-delete {
+      background-color: #dc3545;
+      color: #fff;
+      border: none;
+    }
+
+    .btn-toggle {
+      background-color: #6c757d;
+      color: #fff;
+      border: none;
+    }
+
+    .btn-delete:hover {
+      background-color: #c82333;
+    }
+
+    .btn-toggle:hover {
+      background-color: #5a6268;
+    }
+
+    /************************************
+     7. Footer Note
+    *************************************/
+    .footer-note {
+      text-align: center;
+      color: #444;
+      margin-top: 20px;
+      font-size: 0.9rem;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1><i class="bi bi-people-fill"></i> Users Overview</h1>
+
+    <!-- Property Owners Section -->
+    <div class="table-container">
+      <h2><i class="bi bi-house-heart"></i> Property Owners</h2>
+      <div class="table-scroll">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th><i class="bi bi-hash"></i>#</th>
+              <th><i class="bi bi-person"></i> Username</th>
+              <th><i class="bi bi-card-text"></i> Full Name</th>
+              <th><i class="bi bi-envelope"></i> Email</th>
+              <th><i class="bi bi-telephone"></i> Phone #1</th>
+              <th><i class="bi bi-telephone-plus"></i> Phone #2</th>
+              <th><i class="bi bi-check-circle"></i> Allowed</th>
+              <th><i class="bi bi-gear"></i> Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in owner_users %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ user.username }}</td>
+              <td>{{ user.fullname }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.phone_number1 }}</td>
+              <td>{{ user.phone_number2|default:"-" }}</td>
+              <td>
+                {% if user.is_allowed %}
+                  <i class="bi bi-check-circle-fill allowed-true"></i>
+                {% else %}
+                  <i class="bi bi-x-circle-fill allowed-false"></i>
+                {% endif %}
+              </td>
+              <td>
+                <a 
+                  href="{% url 'delete_user' user.id %}" 
+                  class="btn btn-action btn-delete"
+                >
+                  <i class="bi bi-trash"></i> Delete
+                </a>
+                <a 
+                  href="{% url 'toggle_is_allowed' user.id %}" 
+                  class="btn btn-action btn-toggle"
+                >
+                  {% if user.is_allowed %}
+                    <i class="bi bi-toggle-on"></i> Unallow
+                  {% else %}
+                    <i class="bi bi-toggle-off"></i> Allow
+                  {% endif %}
+                </a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="8" class="no-data">No property owners found.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Clients Section -->
+    <div class="table-container">
+      <h2><i class="bi bi-people"></i> Clients</h2>
+      <div class="table-scroll">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th><i class="bi bi-hash"></i>#</th>
+              <th><i class="bi bi-person"></i> Username</th>
+              <th><i class="bi bi-card-text"></i> Full Name</th>
+              <th><i class="bi bi-envelope"></i> Email</th>
+              <th><i class="bi bi-telephone"></i> Phone #1</th>
+              <th><i class="bi bi-check-circle"></i> Allowed</th>
+              <th><i class="bi bi-gear"></i> Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in client_users %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ user.username }}</td>
+              <td>{{ user.fullname }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.phone_number1 }}</td>
+              <td>
+                {% if user.is_allowed %}
+                  <i class="bi bi-check-circle-fill allowed-true"></i>
+                {% else %}
+                  <i class="bi bi-x-circle-fill allowed-false"></i>
+                {% endif %}
+              </td>
+              <td>
+                <a 
+                  href="{% url 'delete_user' user.id %}" 
+                  class="btn btn-action btn-delete"
+                >
+                  <i class="bi bi-trash"></i> Delete
+                </a>
+                <a 
+                  href="{% url 'toggle_is_allowed' user.id %}" 
+                  class="btn btn-action btn-toggle"
+                >
+                  {% if user.is_allowed %}
+                    <i class="bi bi-toggle-on"></i> Unallow
+                  {% else %}
+                    <i class="bi bi-toggle-off"></i> Allow
+                  {% endif %}
+                </a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="7" class="no-data">No clients found.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      &copy; 2024 MakaziHub | Managing Your Rental Properties Made Easy
+    </div>
+  </div>
+</body>
+</html>
+{% endblock %}

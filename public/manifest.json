@@ -1,0 +1,22 @@
+{
+    "name": "MakaziHub",
+    "description": "MakaziHub Progressive Web App",
+    "start_url": "/browse/houses/in/public",
+    "scope": "/",
+    "display": "standalone",
+    "theme_color": "#00bfff",
+    "background_color": "#00bfff",
+    "icons": [
+      {
+        "src": "/static/images/makazihub.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      },
+      {
+        "src": "/static/images/makazihub.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ]
+  }
+  

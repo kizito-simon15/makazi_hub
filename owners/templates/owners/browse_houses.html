@@ -1,0 +1,710 @@
+{% extends 'client_base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="container mt-5">
+    <!-- Display Django Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Filtering Form with Carousel -->
+    <form method="get" class="mb-4">
+        <div class="card shadow-lg border-0 rounded-4">
+            <div class="card-header bg-primary text-white rounded-top-4">
+                <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filter Houses</h5>
+            </div>
+            <div class="card-body bg-light p-3">
+                <div id="filterCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
+                    <div class="carousel-inner">
+                        <!-- Slide 1 -->
+                        <div class="carousel-item active">
+                            <div class="row gy-3">
+                                <!-- Region Field -->
+                                <div class="col-12 col-md-6 col-lg-3">
+                                    <label for="id_region" class="form-label">
+                                        <i class="fas fa-map-marker-alt me-2 text-danger"></i>Region
+                                    </label>
+                                    {{ form.region|as_crispy_field }}
+                                </div>
+                                <!-- District Field -->
+                                <div class="col-12 col-md-6 col-lg-3">
+                                    <label for="id_district" class="form-label">
+                                        <i class="fas fa-city me-2 text-info"></i>District
+                                    </label>
+                                    {{ form.district|as_crispy_field }}
+                                </div>
+                                <!-- Ward Field -->
+                                <div class="col-12 col-md-6 col-lg-3">
+                                    <label for="id_ward" class="form-label">
+                                        <i class="fas fa-compass me-2 text-success"></i>Ward
+                                    </label>
+                                    {{ form.ward|as_crispy_field }}
+                                </div>
+                                <!-- Street Field -->
+                                <div class="col-12 col-md-6 col-lg-3">
+                                    <label for="id_street" class="form-label">
+                                        <i class="fas fa-road me-2 text-warning"></i>Street
+                                    </label>
+                                    {{ form.street|as_crispy_field }}
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Slide 2 -->
+                        <div class="carousel-item">
+                            <div class="row gy-3">
+                                <!-- House Number Field -->
+                                <div class="col-12 col-md-6 col-lg-3">
+                                    <label for="id_house_number" class="form-label">
+                                        <i class="fas fa-home me-2 text-primary"></i>House Number
+                                    </label>
+                                    {{ form.house_number|as_crispy_field }}
+                                </div>
+                                <!-- Furnishing Status Field -->
+                                <div class="col-12 col-md-6 col-lg-3">
+                                    <label for="id_furnishing_status" class="form-label">
+                                        <i class="fas fa-couch me-2 text-secondary"></i>Furnishing Status
+                                    </label>
+                                    {{ form.furnishing_status|as_crispy_field }}
+                                </div>
+                                <!-- Amenities Field -->
+                                <div class="col-12 col-md-6 col-lg-3">
+                                    <label for="id_amenities" class="form-label">
+                                        <i class="fas fa-tools me-2 text-dark"></i>Amenities
+                                    </label>
+                                    {{ form.amenities|as_crispy_field }}
+                                </div>
+                                <!-- Utilities Included Field -->
+                                <div class="col-12 col-md-6 col-lg-3">
+                                    <label for="id_utilities_included" class="form-label">
+                                        <i class="fas fa-lightbulb me-2 text-warning"></i>Utilities Included
+                                    </label>
+                                    {{ form.utilities_included|as_crispy_field }}
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Slide 3 -->
+                        <div class="carousel-item">
+                            <div class="row gy-3">
+                                <!-- House Type Field -->
+                                <div class="col-12 col-md-6 col-lg-3">
+                                    <label for="id_house_type" class="form-label">
+                                        <i class="fas fa-building me-2 text-success"></i>House Type
+                                    </label>
+                                    {{ form.house_type|as_crispy_field }}
+                                </div>
+                                <!-- Flooring and Finishing Field -->
+                                <div class="col-12 col-md-6 col-lg-3">
+                                    <label for="id_flooring_and_finishing" class="form-label">
+                                        <i class="fas fa-paint-brush me-2 text-info"></i>Flooring & Finishing
+                                    </label>
+                                    {{ form.flooring_and_finishing|as_crispy_field }}
+                                </div>
+                                <!-- Proximity Information Field -->
+                                <div class="col-12 col-md-6 col-lg-3">
+                                    <label for="id_proximity_information" class="form-label">
+                                        <i class="fas fa-school me-2 text-danger"></i>Proximity Information
+                                    </label>
+                                    {{ form.proximity_information|as_crispy_field }}
+                                </div>
+                                <!-- Rules and Restrictions Field -->
+                                <div class="col-12 col-md-6 col-lg-3">
+                                    <label for="id_rules_and_restrictions" class="form-label">
+                                        <i class="fas fa-ban me-2 text-primary"></i>Rules & Restrictions
+                                    </label>
+                                    {{ form.rules_and_restrictions|as_crispy_field }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Carousel Controls with Unique Class -->
+                    <button class="carousel-control-prev filter-carousel-control" type="button" data-bs-target="#filterCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next filter-carousel-control" type="button" data-bs-target="#filterCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+            </div>
+            <div class="card-footer bg-light text-end">
+                <button type="submit" class="btn btn-success rounded-pill me-2">
+                    <i class="fas fa-search me-2"></i>Apply Filters
+                </button>
+                <a href="{% url 'browse_houses' %}" class="btn btn-secondary rounded-pill">
+                    <i class="fas fa-redo me-2"></i>Reset
+                </a>
+            </div>
+        </div>
+    </form>
+
+    <!-- Display Houses in Grid (Four Blocks per Row) -->
+    <div class="row gy-4">
+        {% for entry in houses_with_details %}
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="card shadow-lg border-0 rounded-4">
+                <!-- House Header with Like Button -->
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center rounded-top-4">
+                    <div>
+                        <h5 class="mb-0">
+                            <a href="{% url 'client_house_details' entry.house.id %}" class="text-white text-decoration-none">
+                                {{ entry.house.house_name }}
+                            </a>
+                        </h5>
+                        <p class="mb-0">
+                            <i class="fas fa-map-marker-alt me-2"></i>{{ entry.house.region }},
+                            {{ entry.house.district }},
+                            {{ entry.house.ward }}
+                        </p>
+                    </div>
+                    <div>
+                        <!-- Like Button as a Form -->
+                        <form action="{% url 'toggle_house_like' house_id=entry.house.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-like" aria-label="{% if entry.is_liked %}Unlike{% else %}Like{% endif %} House">
+                                <i class="fas fa-heart{% if entry.is_liked %} text-danger{% else %} text-white{% endif %}"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- House Media Slider -->
+                <div class="card-body bg-light p-2">
+                    {% if entry.combined_house_medias %}
+                    <div id="carouselHouse{{ entry.house.id }}" class="carousel slide mb-3" data-bs-ride="carousel" data-bs-interval="5000">
+                        <div class="carousel-inner">
+                            {% for media in entry.combined_house_medias %}
+                                {% if media.type == 'photo' %}
+                                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                    <img src="{{ media.url }}" class="d-block w-100 rounded-3" alt="House Photo" style="height:200px; object-fit:cover;">
+                                    {% if media.caption %}
+                                    <div class="carousel-caption d-none d-md-block">
+                                        <p>{{ media.caption }}</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% elif media.type == 'video' %}
+                                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                    <video class="d-block w-100 rounded-3" controls style="height:200px; object-fit:cover;">
+                                        <source src="{{ media.url }}" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                    {% if media.caption %}
+                                    <div class="carousel-caption d-none d-md-block">
+                                        <p>{{ media.caption }}</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <!-- Carousel Controls for House Media -->
+                        {% if entry.combined_house_medias|length > 1 %}
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselHouse{{ entry.house.id }}" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carouselHouse{{ entry.house.id }}" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                        <p class="text-muted">No media available.</p>
+                    {% endif %}
+
+                    <!-- Assigned Agent and Chat Button -->
+                    {% if entry.assigned_agent %}
+                    <div class="d-flex align-items-center mb-2">
+                        {% if entry.assigned_agent.profile_picture %}
+                            <img src="{{ entry.assigned_agent.profile_picture.url }}" alt="Agent Profile" class="rounded-circle me-2" style="width:40px; height:40px; object-fit:cover;">
+                        {% else %}
+                            <img src="{% static 'images/default_agent.png' %}" alt="Default Agent Profile" class="rounded-circle me-2" style="width:40px; height:40px; object-fit:cover;">
+                        {% endif %}
+                        <strong>{{ entry.assigned_agent.first_name }} {{ entry.assigned_agent.last_name }}</strong>
+                    </div>
+                    <div class="mb-3">
+                        <a href="{% url 'send_message' house_id=entry.house.id agent_id=entry.assigned_agent.id %}" class="btn btn-info btn-sm rounded-pill">
+                            <i class="fas fa-comments me-2"></i>Chat with Agent
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <!-- Rooms Summary -->
+                    <div class="mb-2">
+                        <i class="fas fa-door-open me-2 text-primary"></i>
+                        <strong>Available Rooms:</strong> {{ entry.house.available_rooms }}
+                    </div>
+                </div>
+
+                <!-- Rooms and Comments Toggle -->
+                <div class="card-footer bg-light text-center">
+                    <button class="btn btn-outline-primary btn-sm toggle-rooms-btn d-flex align-items-center justify-content-center" data-bs-toggle="collapse" data-bs-target="#roomsCollapse{{ entry.house.id }}" aria-expanded="false" aria-controls="roomsCollapse{{ entry.house.id }}">
+                        <i class="fas fa-chevron-down me-2"></i>Show Details
+                    </button>
+                </div>
+
+                <!-- Collapsible Section for Rooms and Comments -->
+                <div class="collapse" id="roomsCollapse{{ entry.house.id }}">
+                    <div class="card-body bg-white">
+                        <!-- Rooms Section -->
+                        <h5><i class="fas fa-door-open me-2 text-primary"></i>Rooms</h5>
+                        {% for room_entry in entry.rooms_with_details %}
+                        <div class="card mb-3 border-0 shadow-sm rounded-3">
+                            <div class="card-body bg-light rounded-3">
+                                <h6><i class="fas fa-bed me-2 text-success"></i>Room {{ room_entry.room.room_number }}</h6>
+                                <p><i class="fas fa-info-circle me-2 text-secondary"></i>{{ room_entry.room.description }}</p>
+                                <p><i class="fas fa-tag me-2 text-warning"></i>Price: {{ room_entry.room.rental_price }} TZS</p>
+        <!-- Button to Room Details -->
+        <a href="{% url 'room_details' room_entry.room.id %}" class="btn btn-primary btn-sm mt-2">
+            <i class="fas fa-info-circle me-1"></i>Room Details
+        </a>
+                                <!-- Room Media Slider -->
+                                {% if room_entry.combined_room_medias %}
+                                <div id="carouselRoom{{ room_entry.room.id }}" class="carousel slide mb-3" data-bs-ride="carousel" data-bs-interval="5000">
+                                    <div class="carousel-inner">
+                                        {% for media in room_entry.combined_room_medias %}
+                                            {% if media.type == 'photo' %}
+                                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                                <img src="{{ media.url }}" class="d-block w-100 rounded-3" alt="Room Photo" style="height:150px; object-fit:cover;">
+                                                {% if media.caption %}
+                                                <div class="carousel-caption d-none d-md-block">
+                                                    <p>{{ media.caption }}</p>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            {% elif media.type == 'video' %}
+                                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                                <video class="d-block w-100 rounded-3" controls style="height:150px; object-fit:cover;">
+                                                    <source src="{{ media.url }}" type="video/mp4">
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                                {% if media.caption %}
+                                                <div class="carousel-caption d-none d-md-block">
+                                                    <p>{{ media.caption }}</p>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    <!-- Carousel Controls for Room Media -->
+                                    {% if room_entry.combined_room_medias|length > 1 %}
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselRoom{{ room_entry.room.id }}" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Previous</span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#carouselRoom{{ room_entry.room.id }}" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Next</span>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                                {% else %}
+                                    <p class="text-muted">No media available for this room.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        <!-- Comments Section -->
+                        <hr>
+                        <h5><i class="fas fa-comments me-2 text-info"></i>Comments (<span id="comment-count-{{ entry.house.id }}">{{ entry.comment_count }}</span>)</h5>
+                        {% if entry.comment_count > 0 %}
+                            <ul class="list-group mb-4" id="comment-list-{{ entry.house.id }}">
+                                {% for cdata in entry.comments %}
+                                <li class="list-group-item" id="comment-{{ cdata.comment.id }}">
+                                    <strong>{{ cdata.comment.client.user.username }}</strong> commented:
+                                    <p class="mb-1" id="comment-text-{{ cdata.comment.id }}">{{ cdata.comment.comment_text|linebreaks }}</p>
+                                    <small class="text-muted">
+                                        Created at: {{ cdata.comment.created_at|date:"M d, Y H:i" }}, 
+                                        Last updated: {{ cdata.comment.updated_at|date:"M d, Y H:i" }}
+                                    </small>
+                                    {% if cdata.owned %}
+                                    <div class="mt-2">
+                                        <button class="btn btn-warning btn-sm me-2 edit-comment-btn" data-comment-id="{{ cdata.comment.id }}" data-comment-text="{{ cdata.comment.comment_text|escapejs }}">
+                                            <i class="fas fa-edit me-1"></i>Edit
+                                        </button>
+                                        <button class="btn btn-danger btn-sm delete-comment-btn" data-comment-id="{{ cdata.comment.id }}">
+                                            <i class="fas fa-trash me-1"></i>Delete
+                                        </button>
+                                    </div>
+                                    {% endif %}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <div class="alert alert-secondary" role="alert">
+                                <i class="fas fa-exclamation-circle me-2"></i>No comments yet. Be the first to comment!
+                            </div>
+                        {% endif %}
+
+                        <!-- Comment Form for New Comment -->
+                        <h6><i class="fas fa-pen me-2 text-secondary"></i>Add a Comment</h6>
+                        <form id="add-comment-form-{{ entry.house.id }}" method="post" action="{% url 'add_comment' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="house_id" value="{{ entry.house.id }}">
+                            <div class="mb-3">
+                                {{ new_comment_form.comment_text|as_crispy_field }}
+                            </div>
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-success rounded-pill">
+                                    <i class="fas fa-paper-plane me-2"></i>Send
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle (Includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery CDN (Required for AJAX functionality) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Custom JavaScript for AJAX Handling and Toggle Functionality -->
+    <script>
+    $(document).ready(function() {
+        // Function to get CSRF token from cookie
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
+        // AJAX setup with CSRF token
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                    // Only send the token to relative URLs i.e., locally.
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+
+        // Handle Add Comment via AJAX
+        {% for entry in houses_with_details %}
+        $('#add-comment-form-{{ entry.house.id }}').submit(function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const form = $(this);
+            const houseId = form.find('input[name="house_id"]').val();
+            const commentText = form.find('textarea[name="comment_text"]').val().trim();
+
+            if (commentText === '') {
+                alert('Comment cannot be empty.');
+                return;
+            }
+
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                data: {
+                    'house_id': houseId,
+                    'comment_text': commentText,
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Create new comment HTML
+                        const ownedButtons = response.owned ? `
+                            <div class="mt-2">
+                                <button class="btn btn-warning btn-sm me-2 edit-comment-btn" data-comment-id="${response.comment_id}" data-comment-text="${response.comment_text.replace(/"/g, '&quot;')}">
+                                    <i class="fas fa-edit me-1"></i>Edit
+                                </button>
+                                <button class="btn btn-danger btn-sm delete-comment-btn" data-comment-id="${response.comment_id}">
+                                    <i class="fas fa-trash me-1"></i>Delete
+                                </button>
+                            </div>
+                        ` : '';
+
+                        const newCommentHtml = `
+                            <li class="list-group-item" id="comment-${response.comment_id}">
+                                <strong>${response.username}</strong> commented:
+                                <p class="mb-1" id="comment-text-${response.comment_id}">${response.comment_text.replace(/\n/g, '<br>')}</p>
+                                <small class="text-muted">
+                                    Created at: ${response.created_at}, 
+                                    Last updated: ${response.updated_at}
+                                </small>
+                                ${ownedButtons}
+                            </li>
+                        `;
+                        // Prepend the new comment to the comment list
+                        $(`#comment-list-${houseId}`).prepend(newCommentHtml);
+                        // Update comment count
+                        const currentCount = parseInt($(`#comment-count-${houseId}`).text());
+                        $(`#comment-count-${houseId}`).text(currentCount + 1);
+                        // Clear the comment textarea
+                        form.find('textarea[name="comment_text"]').val('');
+                    } else {
+                        alert('Error: ' + (response.error || 'Unknown error'));
+                    }
+                },
+                error: function(xhr) {
+                    let errorMsg = 'Error sending comment.';
+                    if (xhr.responseJSON && xhr.responseJSON.error) {
+                        // Attempt to parse and display errors
+                        try {
+                            const errors = JSON.parse(xhr.responseJSON.error);
+                            errorMsg = '';
+                            for (let field in errors) {
+                                errors[field].forEach(error => {
+                                    errorMsg += `${error.message}\n`;
+                                });
+                            }
+                        } catch (e) {
+                            // If parsing fails, keep the default message
+                        }
+                    }
+                    alert(errorMsg);
+                }
+            });
+        });
+        {% endfor %}
+
+        // Handle Update Comment
+        $(document).on('click', '.edit-comment-btn', function() {
+            const commentId = $(this).data('comment-id');
+            const currentText = $(this).closest('li').find(`#comment-text-${commentId}`).html().replace(/<br\s*\/?>/mg,"\n").replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+
+            // Replace the comment text paragraph with the textarea
+            const textarea = `<textarea class="form-control mb-2" id="edit-text-${commentId}">${currentText}</textarea>`;
+            const saveButton = `<button class="btn btn-success btn-sm me-2 save-comment-btn" data-comment-id="${commentId}"><i class="fas fa-save me-1"></i>Save</button>`;
+            const cancelButton = `<button class="btn btn-secondary btn-sm cancel-comment-btn" data-comment-id="${commentId}"><i class="fas fa-times me-1"></i>Cancel</button>`;
+
+            // Replace the comment text paragraph with the textarea
+            $(this).closest('li').find(`#comment-text-${commentId}`).replaceWith(textarea);
+            // Hide the Delete button
+            $(this).siblings('.delete-comment-btn').hide();
+            // Replace the Edit button with Save and Cancel buttons
+            $(this).replaceWith(saveButton + cancelButton);
+        });
+
+        // Handle Save Comment
+        $(document).on('click', '.save-comment-btn', function() {
+            const commentId = $(this).data('comment-id');
+            const newText = $(this).closest('li').find(`#edit-text-${commentId}`).val().trim();
+
+            if (newText === '') {
+                alert('Comment cannot be empty.');
+                return;
+            }
+
+            $.ajax({
+                url: "{% url 'update_comment' %}",
+                type: "POST",
+                data: {
+                    'comment_id': commentId,
+                    'comment_text': newText,
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Update the comment text and timestamp in the DOM
+                        const updatedText = response.comment_text.replace(/\n/g, '<br>');
+                        $(`#comment-text-${commentId}`).replaceWith(`<p class="mb-1" id="comment-text-${commentId}">${updatedText}</p>`);
+                        $(`#comment-updated-${commentId}`).text(response.updated_at);
+                        // Restore the Edit and Delete buttons
+                        const updateButton = `<button class="btn btn-warning btn-sm me-2 edit-comment-btn" data-comment-id="${response.comment_id}" data-comment-text="${response.comment_text.replace(/"/g, '&quot;')}"><i class="fas fa-edit me-1"></i>Edit</button>`;
+                        const deleteButton = `<button class="btn btn-danger btn-sm delete-comment-btn" data-comment-id="${response.comment_id}"><i class="fas fa-trash me-1"></i>Delete</button>`;
+                        $(this).closest('li').find('.cancel-comment-btn').remove();
+                        $(this).replaceWith(updateButton + deleteButton);
+                    } else {
+                        alert(response.error || 'An error occurred while updating your comment.');
+                    }
+                }.bind(this),
+                error: function(xhr, errmsg, err) {
+                    alert('An error occurred while updating your comment.');
+                }
+            });
+        });
+
+        // Handle Cancel Edit
+        $(document).on('click', '.cancel-comment-btn', function() {
+            const commentId = $(this).data('comment-id');
+            const originalText = $(this).closest('li').find(`#edit-text-${commentId}`).val();
+
+            // Replace the textarea with the original comment text
+            const displayText = originalText.replace(/\n/g, '<br>');
+            $(this).closest('li').find(`#comment-text-${commentId}`).replaceWith(`<p class="mb-1" id="comment-text-${commentId}">${displayText}</p>`);
+            // Restore the Edit and Delete buttons
+            const updateButton = `<button class="btn btn-warning btn-sm me-2 edit-comment-btn" data-comment-id="${commentId}" data-comment-text="${originalText.replace(/"/g, '&quot;')}"><i class="fas fa-edit me-1"></i>Edit</button>`;
+            const deleteButton = `<button class="btn btn-danger btn-sm delete-comment-btn" data-comment-id="${commentId}"><i class="fas fa-trash me-1"></i>Delete</button>`;
+            $(this).closest('li').find('.save-comment-btn').remove();
+            $(this).replaceWith(updateButton + deleteButton);
+        });
+
+        // Handle Delete Comment
+        $(document).on('click', '.delete-comment-btn', function() {
+            if (!confirm('Are you sure you want to delete this comment?')) {
+                return;
+            }
+
+            const commentId = $(this).data('comment-id');
+            const houseId = $(this).closest('.card-body').find('form[id^="add-comment-form-"]').attr('id').split('-').pop();
+
+            $.ajax({
+                url: "{% url 'delete_comment' %}",
+                type: "POST",
+                data: {
+                    'comment_id': commentId,
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Remove the comment from the DOM
+                        $(`#comment-${commentId}`).remove();
+                        // Update comment count
+                        const currentCount = parseInt($(`#comment-count-${houseId}`).text());
+                        $(`#comment-count-${houseId}`).text(currentCount - 1);
+                    } else {
+                        alert(response.error || 'An error occurred while deleting your comment.');
+                    }
+                },
+                error: function(xhr, errmsg, err) {
+                    alert('An error occurred while deleting your comment.');
+                }
+            });
+        });
+
+        // JavaScript for Toggle Rooms and Comments Button Icon Rotation and Text Change
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleButtons = document.querySelectorAll('.toggle-rooms-btn');
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const target = this.getAttribute('data-bs-target');
+                    const collapseElement = document.querySelector(target);
+                    const icon = this.querySelector('i');
+
+                    // Listen for shown and hidden events to update the icon and button text
+                    collapseElement.addEventListener('shown.bs.collapse', () => {
+                        icon.classList.remove('fa-chevron-down');
+                        icon.classList.add('fa-chevron-up');
+                        this.innerHTML = `<i class="fas fa-chevron-up me-2"></i>Hide Details`;
+                    });
+
+                    collapseElement.addEventListener('hidden.bs.collapse', () => {
+                        icon.classList.remove('fa-chevron-up');
+                        icon.classList.add('fa-chevron-down');
+                        this.innerHTML = `<i class="fas fa-chevron-down me-2"></i>Show Details`;
+                    });
+                });
+            });
+        });
+    });
+    </script>
+
+    <!-- Additional Styling for Enhanced Appearance -->
+    <style>
+        /* Heart Button Styling */
+        .btn-like {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 0;
+        }
+        .btn-like:hover {
+            opacity: 0.7;
+        }
+
+        /* Custom Carousel Controls Styling for Filter Carousel */
+        .filter-carousel-control {
+            width: 45px;
+            height: 45px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .filter-carousel-control:hover {
+            background-color: rgba(255, 255, 255, 1);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        /* Positioning Adjustments for Filter Carousel Controls */
+        #filterCarousel .carousel-control-prev.filter-carousel-control {
+            left: -60px; /* Position to the left outside the carousel */
+        }
+        #filterCarousel .carousel-control-next.filter-carousel-control {
+            right: -60px; /* Position to the right outside the carousel */
+        }
+
+        /* Adjust controls for house and room carousels if you want to customize them separately
+           For now, we'll leave them with default Bootstrap styles */
+        .carousel.slide .carousel-control-prev,
+        .carousel.slide .carousel-control-next {
+            /* Optionally, add custom styles here for other carousels */
+            /* For example, increase size or change colors */
+            /* Ensure they are not hidden or overlapping */
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            #filterCarousel .carousel-control-prev.filter-carousel-control,
+            #filterCarousel .carousel-control-next.filter-carousel-control {
+                left: -40px;
+                right: -40px;
+            }
+        }
+
+        /* Comment Form Styling */
+        .form-control {
+            border-radius: 10px;
+        }
+
+        /* Button Styling */
+        .btn-primary, .btn-success, .btn-info, .btn-warning, .btn-danger {
+            border-radius: 30px;
+        }
+
+        /* Adjust icons within comments */
+        .list-group-item i {
+            margin-right: 5px;
+        }
+
+        /* Styling for Edit and Delete Buttons */
+        .edit-comment-btn, .delete-comment-btn {
+            font-size: 0.9rem;
+        }
+
+        /* Chat Button Styling */
+        .btn-info {
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+        }
+
+        .btn-info:hover {
+            background-color: #138496;
+            border-color: #117a8b;
+        }
+
+        /* Customize Icon Rotation */
+        .customize-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .customize-icon:hover {
+            transform: rotate(20deg);
+        }
+    </style>
+{% endblock %}

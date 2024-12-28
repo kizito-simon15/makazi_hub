@@ -1,0 +1,92 @@
+{% extends 'owner_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-primary fw-bold mb-4"><i class="bi bi-people-fill me-2"></i>Clients</h2>
+
+    {% if clients %}
+        {% for client_data in clients %}
+            <div class="card shadow-lg mb-4">
+                <!-- Client Header -->
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="bi bi-person-circle me-2"></i>{{ client_data.client.user.first_name }} {{ client_data.client.user.last_name }}</h4>
+                </div>
+
+                <!-- Client Details -->
+                <div class="card-body">
+                    <h6 class="text-dark"><i class="bi bi-info-circle-fill me-2"></i>Client Details</h6>
+                    <ul class="list-group mb-3">
+                        <li class="list-group-item"><strong>Email:</strong> {{ client_data.client.user.email }}</li>
+                        <li class="list-group-item"><strong>Phone:</strong> {{ client_data.client.phone_number }}</li>
+                    </ul>
+
+                    <!-- Booked Rooms -->
+                    <h6 class="text-dark"><i class="bi bi-door-open-fill me-2"></i>Booked Rooms</h6>
+                    <div class="table-responsive mb-4">
+                        <table class="table table-bordered">
+                            <thead class="table-primary">
+                                <tr class="text-center">
+                                    <th>S/N</th>
+                                    <th>Room Number</th>
+                                    <th>Description</th>
+                                    <th>Rental Price</th>
+                                    <th>Status</th>
+                                    <th>House Name</th>
+                                    <th>View Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for booking in client_data.bookings %}
+                                    <tr class="text-center">
+                                        <td>{{ forloop.counter }}</td>
+                                        <td>{{ booking.room.room_number }}</td>
+                                        <td>{{ booking.room.description }}</td>
+                                        <td>{{ booking.room.rental_price }} TZS</td>
+                                        <td>{{ booking.room.availability_status }}</td>
+                                        <td>{{ booking.room.house.house_name }}</td>
+                                        <td>
+                                            <a href="{% url 'owner_booked_rooms' %}" class="btn btn-info btn-sm">
+                                                <i class="bi bi-eye me-1"></i>View Details
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- House Photos Carousel -->
+                    <h5 class="text-secondary"><i class="bi bi-images me-2"></i>House Photos</h5>
+                    {% for house, photos in client_data.house_photos.items %}
+                        <div id="housePhotosCarousel-{{ house.id }}" class="carousel slide mb-4" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                {% for photo in photos %}
+                                    {% if photo %}
+                                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                            <img src="{{ photo.url }}" class="d-block w-100 rounded shadow" alt="House Photo" style="max-height: 300px; object-fit: cover;">
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <!-- Carousel controls -->
+                            <button class="carousel-control-prev" type="button" data-bs-target="#housePhotosCarousel-{{ house.id }}" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#housePhotosCarousel-{{ house.id }}" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-warning text-center">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>No clients found.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

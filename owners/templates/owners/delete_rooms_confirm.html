@@ -1,0 +1,39 @@
+{% extends "owner_base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg">
+        <div class="card-header bg-danger text-white">
+            <h2 class="text-center">Delete Rooms</h2>
+        </div>
+        <div class="card-body">
+            <p class="text-secondary">
+                This house has <strong>{{ house.number_of_rooms }}</strong> room(s). Select the rooms you want to delete:
+            </p>
+            <form method="post">
+                {% csrf_token %}
+                <ul class="list-group">
+                    {% for room in rooms %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <label>
+                            <input type="checkbox" name="rooms_to_delete" value="{{ room.id }}">
+                            Room {{ room.room_number }}: {{ room.description }}
+                        </label>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-danger btn-lg">
+                        <i class="bi bi-trash"></i> Confirm Delete
+                    </button>
+                </div>
+            </form>
+            <div class="d-grid mt-3">
+                <a href="{% url 'house_list' %}" class="btn btn-secondary btn-lg">
+                    <i class="bi bi-arrow-left"></i> Back to House List
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

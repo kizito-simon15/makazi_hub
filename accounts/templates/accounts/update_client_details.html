@@ -1,0 +1,71 @@
+{% extends 'client_base.html' %}
+
+
+{% load crispy_forms_tags %}
+
+{% block head %}
+<!-- Include Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOMtkG5BvhE6Z02wS/k1oP9BrRitlfhJxStjoxm" crossorigin="anonymous">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg" style="border-radius: 20px; overflow: hidden;">
+        <!-- Header Section -->
+        <div class="card-header text-white text-center" style="padding: 2rem; background: linear-gradient(135deg, #6a11cb, #2575fc);">
+            <h2 class="fw-bold">Update Your Details</h2>
+            <p class="mb-0 text-light">Keep your profile up-to-date</p>
+        </div>
+
+        <!-- Form Section -->
+        <div class="card-body" style="padding: 2rem; background-color: #f8f9fa;">
+            <form method="post">
+                {% csrf_token %}
+                
+                <!-- Form Fields -->
+                <div class="mb-3">
+                    <label for="id_first_name" class="form-label text-primary fw-bold">
+                        <i class="fas fa-user me-2"></i>First Name
+                    </label>
+                    {{ form.first_name|as_crispy_field }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_middle_name" class="form-label text-success fw-bold">
+                        <i class="fas fa-id-badge me-2"></i>Middle Name (Optional)
+                    </label>
+                    {{ form.middle_name|as_crispy_field }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_surname" class="form-label text-danger fw-bold">
+                        <i class="fas fa-user-check me-2"></i>Surname
+                    </label>
+                    {{ form.surname|as_crispy_field }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_email" class="form-label text-warning fw-bold">
+                        <i class="fas fa-envelope me-2"></i>Email Address
+                    </label>
+                    {{ form.email|as_crispy_field }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_phone_number" class="form-label text-info fw-bold">
+                        <i class="fas fa-phone-alt me-2"></i>Phone Number
+                    </label>
+                    {{ form.phone_number|as_crispy_field }}
+                </div>
+
+                <!-- Submit Button -->
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg" style="border-radius: 30px; background: linear-gradient(135deg, #6a11cb, #2575fc);">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

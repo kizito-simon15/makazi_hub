@@ -1,0 +1,258 @@
+{% extends 'owner_base.html' %}
+{% load crispy_forms_tags %}
+
+{% block extra_head %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<style>
+    html, body {
+        margin:0;
+        padding:0;
+        overflow-x: hidden; /* Prevent horizontal scrolling */
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background: linear-gradient(135deg, #d9faff, #ffffff);
+        min-height: 100vh;
+        color: #333;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    .iphone-card {
+        border:0;
+        border-radius:20px; /* Add border radius to create a rounded block */
+        background: linear-gradient(135deg, #ffffff, #f3f8ff);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        width: 90%; /* Increase the width to 90% of the viewport */
+        max-width: 700px; /* Set a max width to control scaling on large screens */
+        margin: 2rem auto; /* Center it horizontally and add top/bottom margin */
+        display: flex;
+        flex-direction: column;
+        min-height: fit-content;
+    }
+
+    .iphone-card-header {
+        border-radius:20px 20px 0 0;
+        background: linear-gradient(135deg, #6a11cb, #2575fc);
+        padding:2rem;
+        position: relative;
+        text-align:center;
+    }
+
+    .iphone-card-header h2 {
+        font-weight:700;
+        color:#fff;
+        margin:0;
+        text-shadow:1px 1px 3px rgba(0,0,0,0.3);
+        font-size:1.5rem;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        gap:0.5rem;
+    }
+
+    .iphone-card-header h2 i {
+        font-size:1.3rem;
+    }
+
+    .edit-icon {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(255,255,255,0.15);
+        border-radius: 50%;
+        width: 40px;
+        height:40px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        color:#fff;
+        text-decoration:none;
+        transition: background 0.2s, transform 0.2s;
+    }
+
+    .edit-icon:hover {
+        background: rgba(255,255,255,0.3);
+        transform: scale(1.05);
+    }
+
+    .card-body {
+        padding:2rem;
+        flex-grow:1;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        overflow:auto;
+    }
+
+    .profile-img {
+        width:120px;
+        height:120px;
+        object-fit:cover;
+        border-radius:50%;
+        box-shadow:0 4px 12px rgba(0,0,0,0.1);
+        margin-bottom:1rem;
+        transition: transform 0.2s;
+    }
+
+    .profile-img:hover {
+        transform: scale(1.03);
+    }
+
+    h3.fw-bold.text-primary.mt-3 {
+        font-size:1.3rem;
+        color:#2575fc!important;
+        margin-bottom:0.2rem!important;
+    }
+
+    p.text-muted {
+        font-size:0.85rem;
+        margin-bottom:1.5rem!important;
+    }
+
+    .detail-label {
+        font-weight:600;
+        margin-bottom:0.2rem;
+        color:#444;
+        display:flex;
+        align-items:center;
+        font-size:0.95rem;
+    }
+
+    .detail-label i {
+        color:#2575fc;
+        margin-right:0.5rem;
+        font-size:1rem;
+    }
+
+    .detail-value {
+        font-size:0.9rem;
+        color:#555;
+        margin-bottom:1rem;
+        padding-left:1.5rem; /* indent to align under label icon */
+    }
+
+    .badge {
+        font-size:0.8rem;
+        padding:0.3rem 0.6rem;
+        border-radius:10px;
+    }
+
+    /* Back to Houses button */
+    .btn-primary.btn-sm {
+        border-radius:10px;
+        font-weight:600;
+        background: linear-gradient(135deg, #6a11cb, #2575fc);
+        border:none;
+        transition: background 0.2s, transform 0.1s;
+        font-size:0.85rem;
+        padding:0.5rem 1rem;
+        display:inline-flex;
+        align-items:center;
+        gap:0.3rem;
+        text-decoration:none;
+        color:#fff;
+    }
+
+    .btn-primary.btn-sm i {
+        font-size:0.9rem;
+    }
+
+    .btn-primary.btn-sm:hover {
+        background: linear-gradient(135deg, #5c0eb5, #1e64d4);
+        transform: translateY(-1px);
+        color:#fff;
+    }
+
+    .btn-primary.btn-sm:active {
+        background: linear-gradient(135deg, #4e0c9d, #1b5bbb);
+        transform: translateY(1px);
+    }
+
+    @media (max-width: 576px) {
+        .iphone-card-header h2 {
+            font-size:1.2rem;
+        }
+
+        .detail-label {
+            font-size:0.9rem;
+        }
+
+        .detail-value {
+            font-size:0.85rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="iphone-card">
+    <div class="iphone-card-header fw-bold">
+        <h2><i class="fas fa-user"></i>Property Owner Details</h2>
+        <!-- Update Icon -->
+        <a href="{% url 'owner_update' %}" class="edit-icon" title="Update Owner Details">
+            <i class="fas fa-edit"></i>
+        </a>
+    </div>
+    <div class="card-body">
+        {% if owner.profile_picture %}
+            <img src="{{ owner.profile_picture.url }}" alt="Profile Picture" class="profile-img">
+        {% else %}
+            <i class="fas fa-user-circle text-secondary" style="font-size:4rem;"></i>
+        {% endif %}
+
+        <h3 class="fw-bold text-primary mt-3">
+            {{ owner.first_name }} {% if owner.middle_name %}{{ owner.middle_name }}{% endif %} {{ owner.surname }}
+        </h3>
+        <p class="text-muted">@{{ owner.user.username }}</p>
+
+        <div class="w-100 text-start" style="max-width:400px;">
+            <!-- Email -->
+            <div class="detail-label">
+                <i class="fas fa-envelope"></i>Email:
+            </div>
+            <div class="detail-value">{{ owner.user.email }}</div>
+
+            <!-- Phone Number 1 -->
+            <div class="detail-label">
+                <i class="fas fa-phone"></i>Phone Number 1:
+            </div>
+            <div class="detail-value">{{ owner.user.phone_number1 }}</div>
+
+            <!-- Phone Number 2 -->
+            {% if owner.user.phone_number2 %}
+            <div class="detail-label">
+                <i class="fas fa-phone"></i>Phone Number 2:
+            </div>
+            <div class="detail-value">{{ owner.user.phone_number2 }}</div>
+            {% endif %}
+
+            <!-- Middle Name (User model) -->
+            {% if owner.user.middle_name %}
+            <div class="detail-label">
+                <i class="fas fa-user"></i>Middle Name:
+            </div>
+            <div class="detail-value">{{ owner.user.middle_name }}</div>
+            {% endif %}
+
+            <!-- Is Allowed -->
+            <div class="detail-label">
+                <i class="fas fa-check-circle"></i>Is Allowed:
+            </div>
+            <div class="detail-value">
+                {% if owner.is_allowed %}
+                    <span class="badge bg-success text-white">Yes</span>
+                {% else %}
+                    <span class="badge bg-danger text-white">No</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <a href="{% url 'house_list' %}" class="btn-primary btn-sm shadow-sm">
+                <i class="fas fa-arrow-left"></i>Back to Houses
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

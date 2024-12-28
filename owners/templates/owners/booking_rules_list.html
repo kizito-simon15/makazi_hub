@@ -1,0 +1,219 @@
+{% extends 'owner_base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">
+            <i class="fas fa-file-alt me-2 icon-glow"></i>Booking Rules
+        </h2>
+        <a href="{% url 'create_booking_rule' %}" class="btn btn-bright shadow-lg">
+            <i class="fas fa-plus-circle me-2 icon-glow"></i>Create Booking Rule
+        </a>
+    </div>
+
+    {% if houses_with_rules_and_rooms %}
+        {% for entry in houses_with_rules_and_rooms %}
+        <div class="card mb-4 house-card" style="border-radius: 15px; overflow: hidden;">
+
+            <!-- House Header -->
+            <div class="card-header house-header text-white text-center py-3">
+                <h4 class="mb-0 fw-bold">
+                    <i class="fas fa-home me-2 icon-glow"></i>{{ entry.house }}
+                </h4>
+            </div>
+
+            <div class="card-body card-body-bright">
+                <!-- Booking Rules -->
+                {% if entry.rules %}
+                <div class="mb-4">
+                    <h5 class="section-title mb-3"><i class="fas fa-gavel me-2 icon-glow"></i>Booking Rules:</h5>
+                    <ul class="list-group list-group-flush">
+                        {% for rule in entry.rules %}
+                        <li class="list-group-item rule-item mb-3" style="border-radius: 10px;">
+                            <h6 class="text-bright"><i class="fas fa-calendar-alt me-2 icon-glow"></i>Minimum Months to Pay:</h6>
+                            <p class="fw-bold">{{ rule.minimum_months_to_pay }}</p>
+
+                            <h6 class="text-bright"><i class="fas fa-file-alt me-2 icon-glow"></i>Payment Terms:</h6>
+                            <p class="text-muted">{{ rule.payment_terms }}</p>
+
+                            <h6 class="text-bright"><i class="fas fa-clock me-2 icon-glow"></i>Created At:</h6>
+                            <p class="text-muted">{{ rule.created_at }}</p>
+
+                            <div class="text-end mt-3">
+                                <a href="{% url 'create_or_update_booking_rule' rule.house.id %}" class="btn btn-outline-glow btn-sm me-2">
+                                    <i class="fas fa-edit me-1 icon-glow"></i>Edit
+                                </a>
+                                <a href="{% url 'delete_booking_rule' rule.id %}" class="btn btn-outline-danger-glow btn-sm">
+                                    <i class="fas fa-trash-alt me-1 icon-glow"></i>Delete
+                                </a>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% else %}
+                <p class="text-muted text-center">No booking rules added for this house.</p>
+                {% endif %}
+
+                <!-- Rooms and Payments -->
+                <h5 class="section-title mt-4"><i class="fas fa-bed me-2 icon-glow"></i>Rooms and Payments:</h5>
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mt-3">
+                    {% for room_entry in entry.rooms_with_payments %}
+                    <div class="col">
+                        <div class="card room-card h-100" style="border-radius: 10px;">
+                            <div class="card-header room-header text-white text-center">
+                                <h6 class="mb-0 fw-bold"><i class="fas fa-door-open me-2 icon-glow"></i>Room {{ room_entry.room.room_number }}</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong><i class="fas fa-info-circle me-2 icon-glow"></i>Description:</strong> {{ room_entry.room.description }}</p>
+                                <p><strong><i class="fas fa-tag me-2 icon-glow"></i>Rental Price:</strong> {{ room_entry.room.rental_price }} TZS</p>
+                                <p><strong><i class="fas fa-money-bill me-2 icon-glow"></i>Total Payment:</strong> 
+                                    {% if room_entry.total_payment %}
+                                        <span class="fw-bold text-success">{{ room_entry.total_payment }} TZS</span>
+                                    {% else %}
+                                        <span class="text-muted">No rules applied</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Payment Methods -->
+                {% for rule in entry.rules %}
+                    {% if rule.payment_methods.all %}
+                    <h5 class="section-title mt-5"><i class="fas fa-credit-card me-2 icon-glow"></i>Payment Methods:</h5>
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mt-3">
+                        {% for payment_method in rule.payment_methods.all %}
+                        <div class="col">
+                            <div class="card payment-card h-100" style="border-radius: 10px;">
+                                <div class="card-header payment-header text-white text-center">
+                                    <h6 class="mb-0 fw-bold">
+                                        <i class="fas fa-credit-card me-2 icon-glow"></i>{{ payment_method.method_name }} - {{ payment_method.provider }}
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong><i class="fas fa-file-alt me-2 icon-glow"></i>Account Details:</strong> {{ payment_method.account_details }}</p>
+                                    <p><strong><i class="fas fa-phone me-2 icon-glow"></i>Number:</strong> {{ payment_method.number }}</p>
+                                    <p><strong><i class="fas fa-user me-2 icon-glow"></i>Recipient Name:</strong> {{ payment_method.recipient_name }}</p>
+                                    <p><strong><i class="fas fa-info-circle me-2 icon-glow"></i>Instructions:</strong> {{ payment_method.instructions }}</p>
+                                    <p>
+                                        <strong><i class="fas fa-toggle-on me-2 icon-glow"></i>Status:</strong>
+                                        <span class="badge 
+                                            {% if payment_method.status == 'Active' %}bg-success{% else %}bg-danger{% endif %}">
+                                            {{ payment_method.status }}
+                                        </span>
+                                    </p>
+                                    <p><strong><i class="fas fa-coins me-2 icon-glow"></i>Currency:</strong> {{ payment_method.currency }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <!-- No Rules Message -->
+    <div class="alert alert-warning text-center mt-4 shadow-sm no-rules-alert" role="alert" style="border-radius: 10px;">
+        <i class="fas fa-info-circle me-2 icon-glow"></i>No booking rules available. Start by creating rules for your houses!
+    </div>
+    {% endif %}
+</div>
+
+<!-- Custom Bright Styling -->
+<style>
+    /* Removed .text-glow from headings and set .section-title to blue */
+    .section-title {
+        color: #007bff; /* Blue color for better visibility */
+        font-size: 1.4rem;
+        text-shadow: 0 0 5px #fff;
+    }
+
+    .icon-glow {
+        text-shadow: 0 0 5px #fff;
+    }
+
+    .house-header {
+        background: linear-gradient(90deg, #ff7f50, #ff1493);
+        box-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+    }
+
+    .card-body-bright {
+        background: #ffecc7;
+    }
+
+    .rule-item {
+        background: #fffae3;
+        box-shadow: 0 0 10px rgba(255, 241, 158, 0.7);
+    }
+
+    .text-bright {
+        color: #ff1493 !important;
+    }
+
+    .room-card {
+        background: #fff5ba;
+        border: none;
+        box-shadow: 0 0 10px rgba(255, 213, 79, 0.6);
+    }
+
+    .room-header {
+        background: linear-gradient(135deg, #ffafbd, #ffc3a0);
+        text-shadow: 0 0 5px #fff;
+    }
+
+    .payment-card {
+        background: #e0fffa;
+        border: none;
+        box-shadow: 0 0 10px rgba(128, 255, 219, 0.6);
+    }
+
+    .payment-header {
+        background: linear-gradient(135deg, #24c6dc, #514a9d);
+        text-shadow: 0 0 5px #fff;
+    }
+
+    .btn-bright {
+        background: linear-gradient(135deg, #f093fb, #f5576c);
+        color: #fff;
+        font-weight: 600;
+        border: none;
+    }
+    .btn-bright:hover {
+        background: linear-gradient(135deg, #f5576c, #f093fb);
+        color: #fff;
+    }
+
+    .btn-outline-glow {
+        border: 2px solid #4dff00;
+        color: #4dff00;
+    }
+    .btn-outline-glow:hover {
+        background: #4dff00;
+        color: #000;
+    }
+
+    .btn-outline-danger-glow {
+        border: 2px solid #ff0000;
+        color: #ff0000;
+    }
+    .btn-outline-danger-glow:hover {
+        background: #ff0000;
+        color: #fff;
+    }
+
+    .no-rules-alert {
+        background: #fff6bf;
+        border: 2px solid #ffd700;
+        font-weight: 600;
+        box-shadow: 0 0 10px rgba(255, 223, 0, 0.7);
+    }
+</style>
+{% endblock %}

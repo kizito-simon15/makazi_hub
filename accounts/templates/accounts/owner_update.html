@@ -1,0 +1,403 @@
+{% extends 'owner_base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block extra_head %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<style>
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background: linear-gradient(135deg, #e0f7fa, #fff);
+        min-height: 100vh;
+        color:#333;
+        margin:0;
+        padding:0;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    .iphone-card {
+        border:0;
+        border-radius:20px;
+        background: linear-gradient(135deg, #ffffff, #f8fcff);
+        box-shadow:0 4px 12px rgba(0,0,0,0.08);
+        margin-top:2rem;
+        max-width:500px;
+        margin-left:auto;
+        margin-right:auto;
+        overflow:hidden;
+        position: relative;
+    }
+
+    .iphone-card-header {
+        border-radius:20px 20px 0 0;
+        background: linear-gradient(135deg, #6a11cb, #2575fc);
+        padding:2rem;
+        text-align:center;
+    }
+
+    .iphone-card-header h2 {
+        font-weight:700;
+        color:#fff;
+        margin:0;
+        text-shadow:1px 1px 3px rgba(0,0,0,0.15);
+    }
+
+    .card-body {
+        padding:2rem;
+    }
+
+    .btn-back {
+        border-radius:10px;
+        font-weight:600;
+        background:#e0e0e0;
+        border:none;
+        margin-bottom:1rem;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        width: fit-content;
+        transition: background 0.2s;
+        text-decoration: none;
+        color:#333;
+    }
+
+    .btn-back:hover {
+        background:#ccc;
+        text-decoration: none;
+        color:#333;
+    }
+
+    .form-label {
+        font-weight:600;
+        color:#444;
+        display:flex;
+        align-items:center;
+        margin-bottom:0.5rem;
+        font-size:0.95rem;
+    }
+
+    .form-label i {
+        color:#2575fc;
+        margin-right:0.5rem;
+    }
+
+    /* Form field styling */
+    .form-control {
+        border-radius:12px;
+        border:1px solid #ddd;
+        background:#fdfdfd;
+        transition: box-shadow 0.2s ease-in-out, background 0.2s ease-in-out, transform 0.1s ease-in-out;
+        padding:0.6rem 1rem;
+        font-size:0.95rem;
+    }
+
+    .form-control:hover {
+        background:#ffffff;
+        box-shadow:0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .form-control:focus {
+        box-shadow:0 0 0 3px rgba(37,117,252,0.15);
+        border-color:#2575fc;
+        outline:none;
+        background:#ffffff;
+        transform: scale(1.02);
+    }
+
+    /* Submit button styling */
+    .needs-validation button[type="submit"] {
+        border-radius:12px;
+        font-weight:600;
+        background: linear-gradient(135deg, #6a11cb, #2575fc);
+        border:none;
+        color:#fff;
+        transition: background 0.2s ease-in-out, transform 0.1s ease-in-out;
+        width:100%;
+        padding:0.75rem;
+        font-size:1rem;
+        margin-top:1rem;
+    }
+
+    .needs-validation button[type="submit"]:hover {
+        background: linear-gradient(135deg, #5c0eb5, #1e64d4);
+        transform: translateY(-1px);
+    }
+
+    .needs-validation button[type="submit"]:active {
+        background: linear-gradient(135deg, #4e0c9d, #1b5bbb);
+        transform: translateY(1px);
+    }
+
+    /* Camera and preview styling */
+    #preview-image {
+        display:block;
+        margin-top:1rem;
+        max-width:100px;
+        max-height:100px;
+        border-radius:50%;
+        object-fit:cover;
+        box-shadow:0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .btn-primary i.bi-camera {
+        font-size:1.2rem;
+    }
+
+    .modal-content {
+        border-radius:20px;
+        overflow:hidden;
+    }
+
+    .modal-header, .modal-footer {
+        border:none;
+    }
+
+    .modal-title {
+        font-weight:600;
+    }
+
+    .modal-footer .btn {
+        border-radius:10px;
+        font-weight:600;
+    }
+
+    .modal-footer .btn-secondary {
+        background:#eee;
+        color:#333;
+    }
+
+    .modal-footer .btn-secondary:hover {
+        background:#ddd;
+    }
+
+    .modal-footer .btn-primary {
+        background: linear-gradient(135deg, #6a11cb, #2575fc);
+        color:#fff;
+    }
+
+    .modal-footer .btn-primary:hover {
+        background: linear-gradient(135deg, #5c0eb5, #1e64d4);
+    }
+
+    video {
+        border-radius:12px;
+    }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card iphone-card">
+        <div class="iphone-card-header">
+            <h2><i class="fas fa-user-edit me-2"></i>Update Owner Details</h2>
+        </div>
+        <div class="card-body">
+            <a href="{% url 'owner_details' %}" class="btn btn-back mb-4">
+                <i class="fas fa-arrow-left me-1"></i>Back to Owner Details
+            </a>
+
+            <form method="post" enctype="multipart/form-data" class="needs-validation">
+                {% csrf_token %}
+
+                <!-- First Name -->
+                <div class="mb-4">
+                    <label class="form-label">
+                        <i class="fas fa-user"></i> First Name
+                    </label>
+                    {{ form.first_name }}
+                </div>
+
+                <!-- Middle Name -->
+                <div class="mb-4">
+                    <label class="form-label">
+                        <i class="fas fa-user"></i> Middle Name
+                    </label>
+                    {{ form.middle_name }}
+                </div>
+
+                <!-- Surname -->
+                <div class="mb-4">
+                    <label class="form-label">
+                        <i class="fas fa-user"></i> Surname
+                    </label>
+                    {{ form.surname }}
+                </div>
+
+                <!-- Phone Number 1 -->
+                <div class="mb-4">
+                    <label class="form-label">
+                        <i class="fas fa-phone"></i> Phone Number 1
+                    </label>
+                    {{ form.phone_number1 }}
+                </div>
+
+                <!-- Phone Number 2 -->
+                <div class="mb-4">
+                    <label class="form-label">
+                        <i class="fas fa-phone"></i> Phone Number 2 (Optional)
+                    </label>
+                    {{ form.phone_number2 }}
+                </div>
+
+                <!-- Profile Picture -->
+                <div class="mb-4">
+                    <label class="form-label">
+                        <i class="fas fa-image"></i> Profile Picture
+                    </label>
+                    <div class="d-flex align-items-center">
+                        {{ form.profile_picture }}
+                        <!-- Camera button to open camera modal -->
+                        <button type="button" class="btn btn-primary ms-2" onclick="capturePicture()" aria-label="Take Picture">
+                            <i class="bi bi-camera"></i>
+                        </button>
+                    </div>
+                    <img id="preview-image" style="display:none;">
+                </div>
+
+                <button type="submit">
+                    <i class="fas fa-check-circle me-1"></i>Save Changes
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Video Modal for Capturing Picture -->
+<div class="modal fade" id="cameraModal" tabindex="-1" aria-labelledby="cameraModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered w-100">
+        <div class="modal-content w-100">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cameraModalLabel">Take Picture</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center w-100">
+                <video id="video" autoplay playsinline muted
+                       class="w-100"
+                       style="max-height: 300px; background-color: #000; object-fit: cover;"></video>
+                <canvas id="canvas" style="display: none;"></canvas>
+            </div>
+            <div class="modal-footer w-100 d-flex justify-content-between">
+                <!-- Button to switch camera -->
+                <button type="button" class="btn btn-secondary" onclick="toggleCameraFacingMode()" aria-label="Switch Camera">
+                    <i class="bi bi-arrow-repeat"></i>
+                </button>
+                <!-- Cancel button -->
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Cancel">
+                    <i class="bi bi-x"></i>
+                </button>
+                <!-- Capture button -->
+                <button type="button" class="btn btn-primary" onclick="takeSnapshot()" aria-label="Capture">
+                    <i class="bi bi-camera-fill"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Audio for camera sound -->
+<audio id="camera-sound" src="{% static 'audio/camera.mp3' %}" preload="auto"></audio>
+
+<script>
+    let videoStream = null;
+    let currentFacingMode = "user"; // default to front-facing camera
+
+    const fileInput = document.querySelector('input[type="file"]');
+    const previewImage = document.getElementById('preview-image');
+
+    // Preview the image if user selects a file
+    fileInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            const imgURL = URL.createObjectURL(this.files[0]);
+            previewImage.src = imgURL;
+            previewImage.style.display = 'block';
+        }
+    });
+
+    async function capturePicture() {
+        try {
+            const constraints = {
+                video: { facingMode: currentFacingMode }
+            };
+            videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+            const video = document.getElementById('video');
+            video.srcObject = videoStream;
+            video.onloadedmetadata = () => {
+                video.play();
+            };
+
+            const cameraModal = new bootstrap.Modal(document.getElementById('cameraModal'));
+            cameraModal.show();
+        } catch (error) {
+            console.error("Camera access denied: ", error);
+            alert("Unable to access camera. Please allow camera access and retry.");
+        }
+    }
+
+    function toggleCameraFacingMode() {
+        // Toggle between user (front) and environment (back)
+        currentFacingMode = (currentFacingMode === "user") ? "environment" : "user";
+        restartCamera();
+    }
+
+    async function restartCamera() {
+        // Stop existing stream if present
+        if (videoStream) {
+            videoStream.getTracks().forEach(track => track.stop());
+        }
+
+        try {
+            const constraints = {
+                video: { facingMode: currentFacingMode }
+            };
+            videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+            const video = document.getElementById('video');
+            video.srcObject = videoStream;
+            video.onloadedmetadata = () => {
+                video.play();
+            };
+        } catch (error) {
+            console.error("Camera access error: ", error);
+            alert("Unable to switch camera. Please check permissions.");
+        }
+    }
+
+    function takeSnapshot() {
+        // Play camera sound
+        const cameraSound = document.getElementById('camera-sound');
+        cameraSound.currentTime = 0;
+        cameraSound.play().catch(error => console.error("Audio play error: ", error));
+
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+
+        canvas.toBlob(blob => {
+            const file = new File([blob], "profile_picture.jpg", { type: "image/jpeg" });
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+
+            // Assign the captured image to the input
+            fileInput.files = dataTransfer.files;
+
+            // Show preview
+            const imgURL = URL.createObjectURL(blob);
+            previewImage.src = imgURL;
+            previewImage.style.display = 'block';
+        });
+
+        if (videoStream) {
+            videoStream.getTracks().forEach(track => track.stop());
+        }
+        const cameraModal = bootstrap.Modal.getInstance(document.getElementById('cameraModal'));
+        cameraModal.hide();
+    }
+</script>
+{% endblock %}

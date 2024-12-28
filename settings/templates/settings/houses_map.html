@@ -1,0 +1,344 @@
+{% extends 'website_base.html' %}
+{% block content %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"/>
+
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    background: #f9f9f9;
+    margin: 0; padding: 0;
+  }
+
+  .container {
+    max-width: 90%;
+    margin: 20px auto;
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  }
+
+  #map {
+    width: 100%;
+    height: 600px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    margin-bottom: 20px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .popup-link {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .popup-content {
+    width: 200px;
+    height: 200px;
+    border-radius: 10px;
+    font-size: 0.9em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: center;
+    box-sizing: border-box;
+    padding: 10px;
+    background: #fff;
+    overflow-y: auto;
+    line-height: 1.2em;
+  }
+
+  .popup-content img {
+    width: 100%;
+    height: auto;
+    border-radius: 5px;
+    margin: 5px 0;
+  }
+
+  .locate-btn {
+    background: #28a745;
+    color: #fff;
+    padding: 10px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.9em;
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: inline-block;
+  }
+
+  .locate-btn:hover {
+    background: #218838;
+  }
+
+  .distance-info {
+    font-size: 0.9em;
+    color: #555;
+    margin-top: 10px;
+  }
+
+  /* Loading Overlay */
+  .loading-overlay {
+    position: absolute;
+    top:0; left:0; right:0; bottom:0;
+    background: rgba(255,255,255,0.9);
+    z-index: 9999;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align:center;
+  }
+
+  .loading-overlay.show {
+    display: flex;
+  }
+
+  .loading-text {
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 15px;
+    font-weight:500;
+  }
+
+  .progress-container {
+    width: 80%;
+    max-width:300px;
+    background: #eee;
+    border-radius: 10px;
+    overflow:hidden;
+    position:relative;
+  }
+
+  .progress-bar {
+    height: 20px;
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    width:0%;
+    transition: width 0.3s ease;
+  }
+
+  .progress-label {
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    font-size:0.9rem;
+    font-weight:600;
+    color:#333;
+  }
+</style>
+
+<div class="container">
+  <h1><i class="bi bi-geo-alt-fill"></i> All Houses Map</h1>
+  <p>This map shows all houses. Click <strong>Show My Location</strong> to see where you are. Clicking a house marker draws a line from your location to the house and shows the distance.</p>
+
+  <a href="#" class="locate-btn" id="locate-btn">
+    <i class="bi bi-geo-alt"></i> Show My Location
+  </a>
+
+  <div style="position:relative;">
+    <div id="map"></div>
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="loading-text">Retrieving your current location...</div>
+      <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+        <div class="progress-label" id="progressLabel">0%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="distance-info" id="distance-info"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+<script>
+  const housesData = {{ houses_data|safe }};
+
+  // Initialize map
+  var map = L.map('map').setView([0, 0], 2);
+
+  // Add OSM tiles
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+
+  if (housesData.length > 0) {
+    var markersBounds = housesData.map(h => [h.latitude, h.longitude]);
+    map.fitBounds(markersBounds, { padding: [50, 50] });
+  }
+
+  // House icon
+  var houseIcon = L.icon({
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/854/854878.png',
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    popupAnchor: [0, -30]
+  });
+
+  // User location icon (green)
+  var userIcon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34]
+  });
+
+  var userMarker = null;
+  var userLat = null;
+  var userLng = null;
+  var lineLayer = null;
+
+  housesData.forEach(house => {
+    let popupContent = `
+      <a href="${house.detail_url}" class="popup-link">
+        <div class="popup-content">
+          <strong>${house.name}</strong><br>
+          Lat: ${house.latitude},<br>Lng: ${house.longitude}<br>
+          ${house.profile_picture ? `<img src="${house.profile_picture}" alt="${house.name} Profile Picture">` : ''}
+        </div>
+      </a>
+    `;
+
+    let houseMarker = L.marker([house.latitude, house.longitude], { icon: houseIcon })
+      .addTo(map)
+      .bindPopup(popupContent);
+
+    houseMarker.on('click', function() {
+      if (userLat !== null && userLng !== null) {
+        // Remove existing line if any
+        if (lineLayer) {
+          map.removeLayer(lineLayer);
+        }
+        var userPoint = L.latLng(userLat, userLng);
+        var housePoint = L.latLng(house.latitude, house.longitude);
+
+        // Draw a line between user location and house
+        lineLayer = L.polyline([userPoint, housePoint], {color: 'orange', weight: 4}).addTo(map);
+
+        // Calculate distance
+        var distance = userPoint.distanceTo(housePoint); // in meters
+        var distanceKm = (distance / 1000).toFixed(2);
+
+        document.getElementById('distance-info').textContent = `Distance to ${house.name}: ${distanceKm} km`;
+      } else {
+        document.getElementById('distance-info').textContent = "Please locate yourself first (click 'Show My Location').";
+      }
+    });
+  });
+
+  var locateBtn = document.getElementById('locate-btn');
+  var loadingOverlay = document.getElementById('loadingOverlay');
+  var progressBar = document.getElementById('progressBar');
+  var progressLabel = document.getElementById('progressLabel');
+  var progressInterval = null;
+  var progress = 0;
+
+  locateBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    // Show loading overlay
+    loadingOverlay.classList.add('show');
+    progress = 0;
+    progressBar.style.width = '0%';
+    progressLabel.textContent = '0%';
+
+    // Simulate progress increments
+    progressInterval = setInterval(() => {
+      if (progress < 95) {
+        progress += Math.floor(Math.random() * 10) + 1;
+        if (progress > 95) progress = 95;
+        updateProgress(progress);
+      }
+    }, 500);
+
+    navigator.geolocation.getCurrentPosition(
+      async function(position) {
+        userLat = position.coords.latitude;
+        userLng = position.coords.longitude;
+
+        // Set progress to 100% since we got location
+        updateProgress(100);
+
+        // Stop interval
+        clearInterval(progressInterval);
+
+        // Hide overlay after a short delay
+        setTimeout(() => {
+          loadingOverlay.classList.remove('show');
+        }, 500);
+
+        // Center map on user location
+        map.setView([userLat, userLng], 15);
+
+        // If userMarker exists, move it; otherwise create it
+        if (userMarker) {
+          userMarker.setLatLng([userLat, userLng]);
+        } else {
+          userMarker = L.marker([userLat, userLng], { icon: userIcon }).addTo(map);
+        }
+
+        // Reverse geocode user location using Nominatim with fallback logic
+        try {
+          const url = `https://nominatim.openstreetmap.org/reverse?lat=${userLat}&lon=${userLng}&format=jsonv2&addressdetails=1`;
+          let response = await fetch(url);
+          let data = await response.json();
+          let address = data.address || {};
+
+          // Attempt multiple fields for region/district/ward/street
+          let region = address.state || address.region || address.state_district || 'Unknown Region';
+          let district = address.county || address.city_district || address.district || address.city || 'Unknown District';
+          let ward = address.suburb || address.village || address.town || address.locality || 'Unknown Ward';
+          let street = address.road || address.residential || address.neighbourhood || address.hamlet || 'Unknown Street';
+
+          // Clean up "Unknown" values by omitting them if no better info found
+          if (!region || region.toLowerCase().includes('unknown')) region = '';
+          if (!district || district.toLowerCase().includes('unknown')) district = '';
+          if (!ward || ward.toLowerCase().includes('unknown')) ward = '';
+          if (!street || street.toLowerCase().includes('unknown')) street = '';
+
+          let locationParts = [];
+          if (region) locationParts.push(region);
+          if (district) locationParts.push(district);
+          if (ward) locationParts.push(ward);
+          if (street) locationParts.push(street);
+
+          let finalLocation = (locationParts.length > 0) ? locationParts.join(', ') : 'this area';
+          let popupText = `You are in ${finalLocation}`;
+
+          userMarker.bindPopup(popupText).openPopup();
+
+        } catch (error) {
+          console.error("Reverse geocoding error:", error);
+          userMarker.bindPopup("You are here (unable to get detailed address)").openPopup();
+        }
+
+      },
+      function(error) {
+        console.error(error);
+        clearInterval(progressInterval);
+        loadingOverlay.classList.remove('show');
+        alert("Unable to retrieve your location.");
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000, // timeout after 10 seconds
+        maximumAge: 0
+      }
+    );
+  });
+
+  function updateProgress(value) {
+    progressBar.style.width = value + '%';
+    progressLabel.textContent = value + '%';
+  }
+
+</script>
+{% endblock %}

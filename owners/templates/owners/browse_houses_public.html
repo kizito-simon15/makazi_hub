@@ -1,0 +1,499 @@
+{% extends 'website_base.html' %}
+{% load static %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Browse Houses</title>
+  <!-- Bootstrap CSS -->
+  <link 
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+  />
+  <!-- Bootstrap Icons -->
+  <link 
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+  />
+
+  <style>
+    /* Body background + animation */
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(135deg, #ffa8e8, #a0e1ff, #baffc9);
+      background-size: 200% 200%;
+      animation: gradientShift 8s ease infinite;
+      color: #333;
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    h1, h2 {
+      font-weight: 700;
+      text-align: center;
+      color: #333;
+    }
+    h1 {
+      margin-bottom: 40px;
+      font-size: 1.8rem;
+      opacity: 0;
+      animation: fadeInDown 0.7s ease forwards;
+    }
+    @keyframes fadeInDown {
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    .category-title {
+      font-size: 1.3rem;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      text-align: left;
+      font-weight: 700;
+    }
+
+    /* Filter bar container + animation */
+    .filter-bar-container {
+      position: relative;
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: fadeInUp 0.7s ease 0.3s forwards;
+    }
+    @keyframes fadeInUp {
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    .filter-bar {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 10px;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(10px);
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      scroll-behavior: smooth;
+    }
+    .filter-bar select {
+      border-radius: 5px;
+      padding: 5px 30px 5px 10px;
+      border: 1px solid #ccc;
+      font-size: 0.9rem;
+      background: #fff;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .nav-button {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.1);
+      border: none;
+      width: 30px; 
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex; 
+      align-items: center; 
+      justify-content:center;
+      transition: background 0.3s;
+      z-index: 2;
+    }
+    .nav-button:hover {
+      background: rgba(0,0,0,0.2);
+    }
+    .nav-button i {
+      color: #333;
+      font-size: 0.8rem;
+    }
+    .nav-button-prev { left: 0; }
+    .nav-button-next { right: 0; }
+
+    /* Horizontal scroller for categories + updates */
+    .horizontal-scroller {
+      display: flex;
+      gap: 20px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+      scroll-behavior: smooth;
+    }
+    .horizontal-scroller::-webkit-scrollbar {
+      height: 8px;
+    }
+    .horizontal-scroller::-webkit-scrollbar-thumb {
+      background: #ccc;
+      border-radius: 4px;
+    }
+
+    /* House card styling for each category row */
+    .house-card {
+      min-width: 280px;
+      max-width: 300px;
+      background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(8px);
+      border-radius: 15px;
+      border: 1px solid #ddd;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 380px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .house-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    .house-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #007aff;
+      text-align: center;
+      margin: 10px 0;
+      padding: 0 5px;
+    }
+    .house-title a {
+      color: #007aff;
+      text-decoration: none;
+    }
+    .house-title a:hover {
+      text-decoration: underline;
+    }
+    .slider-container {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .slider-slide {
+      display: none;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top:0; left:0;
+    }
+    .slider-slide.active {
+      display: block;
+    }
+    .slider-slide img,
+    .slider-slide video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .slider-caption {
+      font-size: 0.75rem;
+      color: #555;
+      text-align: center;
+      padding: 4px;
+      background: rgba(255,255,255,0.8);
+      position: absolute;
+      bottom: 0; 
+      width: 100%;
+    }
+    .house-info {
+      font-size: 0.85rem;
+      line-height: 1.3;
+      padding: 8px 10px;
+      background: #fafafa;
+    }
+
+    /* Cards for House Updates row */
+    .update-card {
+      min-width: 280px;
+      max-width: 300px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 15px;
+      border: 1px solid #ddd;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      height: 280px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease;
+    }
+    .update-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    /* Search button styling */
+    .search-btn {
+      border-radius: 20px;
+      padding: 8px 20px;
+      border: none;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      color: #fff;
+      font-weight:600;
+      cursor:pointer;
+      transition: background 0.2s;
+      font-size: 0.9rem;
+    }
+    .search-btn:hover {
+      background: linear-gradient(135deg, #5c0eb5, #1e64d4);
+    }
+
+    @media(max-width: 600px) {
+      body { padding: 10px; }
+      .filter-bar { gap: 5px; }
+      .filter-bar select { min-width: 100px; font-size: 0.8rem; }
+      .search-btn { font-size: 0.8rem; }
+      .house-card { max-width: 100%; }
+      .update-card { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 1) Search Form -->
+  <form method="get" id="searchForm">
+    <div class="filter-bar-container mb-3">
+      <button type="button" class="nav-button nav-button-prev">
+        <i class="bi bi-chevron-left"></i>
+      </button>
+      <div class="filter-bar" id="filterBar">
+        <!-- Region -->
+        <select name="region" class="form-select form-select-sm me-2">
+          <option value="">All Regions</option>
+          {% for r in regions %}
+          <option value="{{ r.id }}" {% if request.GET.region == r.id|stringformat:"s" %}selected{% endif %}>
+            {{ r.name }}
+          </option>
+          {% endfor %}
+        </select>
+        <!-- District -->
+        <select name="district" class="form-select form-select-sm me-2">
+          <option value="">All Districts</option>
+          {% for d in districts %}
+          <option value="{{ d.id }}" {% if request.GET.district == d.id|stringformat:"s" %}selected{% endif %}>
+            {{ d.name }}
+          </option>
+          {% endfor %}
+        </select>
+        <!-- Ward -->
+        <select name="ward" class="form-select form-select-sm me-2">
+          <option value="">All Wards</option>
+          {% for w in wards %}
+          <option value="{{ w.id }}" {% if request.GET.ward == w.id|stringformat:"s" %}selected{% endif %}>
+            {{ w.name }}
+          </option>
+          {% endfor %}
+        </select>
+        <!-- Street -->
+        <select name="street" class="form-select form-select-sm me-2">
+          <option value="">All Streets</option>
+          {% for st in streets %}
+          <option value="{{ st.id }}" {% if request.GET.street == st.id|stringformat:"s" %}selected{% endif %}>
+            {{ st.name }}
+          </option>
+          {% endfor %}
+        </select>
+        <!-- House Type -->
+        <select name="house_type" class="form-select form-select-sm">
+          <option value="">All House Types</option>
+          {% for ht in house_types %}
+          <option value="{{ ht }}" {% if request.GET.house_type == ht %}selected{% endif %}>
+            {{ ht }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="button" class="nav-button nav-button-next">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+
+    <!-- 2) Boolean Checkboxes (over 30) -->
+    <!-- Example snippet for a few fields -->
+    <div class="row row-cols-2 row-cols-md-4 g-2 my-3">
+      <div class="col">
+        <input type="checkbox" id="id_is_furnished" name="is_furnished"
+               style="transform: scale(1.3); margin-right:6px;"
+               {% if request.GET.is_furnished == 'on' %}checked{% endif %} />
+        <label for="id_is_furnished">Furnished?</label>
+      </div>
+      <div class="col">
+        <input type="checkbox" id="id_is_luxury" name="is_luxury"
+               style="transform: scale(1.3); margin-right:6px;"
+               {% if request.GET.is_luxury == 'on' %}checked{% endif %} />
+        <label for="id_is_luxury">Luxury?</label>
+      </div>
+      <!-- Repeat for all other booleans:
+           is_trending, is_family_friendly, is_smart_home, has_wifi, etc. -->
+    </div>
+
+    <!-- 3) Search & Reset Buttons -->
+    <div class="mb-4">
+      <button type="submit" class="btn btn-primary me-2 search-btn">
+        <i class="bi bi-search"></i> Search
+      </button>
+      <button type="button" class="btn btn-secondary" id="resetButton">
+        <i class="bi bi-arrow-repeat"></i> Reset
+      </button>
+    </div>
+  </form>
+
+  <!-- 4) LATEST UPDATES ROW -->
+  <h2>Latest Updates</h2>
+  <div class="horizontal-scroller mb-4">
+    {% if updates %}
+      {% for upd in updates %}
+      <div class="update-card">
+        <div class="p-2 text-center fw-bold">
+          {{ upd.house.house_name }} Update
+        </div>
+        <div class="flex-grow-1 d-flex align-items-center justify-content-center">
+          {% if upd.update_type == 'photo' %}
+            <img 
+              src="{{ upd.update_file.url }}" 
+              alt="Photo Update" 
+              style="object-fit: cover; width:100%; height:100%;"
+            >
+          {% else %}
+            <video 
+              controls 
+              style="width: 100%; height: 100%; object-fit: cover;"
+            >
+              <source src="{{ upd.update_file.url }}" type="video/mp4">
+            </video>
+          {% endif %}
+        </div>
+        <div class="p-2" style="font-size:0.85rem;">
+          <strong>Caption:</strong> {{ upd.caption|default:"No caption" }}<br>
+          <strong>Posted:</strong> {{ upd.created_at|date:"Y-m-d H:i" }}
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p class="text-muted">No updates found.</p>
+    {% endif %}
+  </div>
+
+  <!-- 5) THIRTEEN CATEGORIES + OTHERS -->
+  <!-- Example: 1) Trending Houses -->
+  <h2 class="category-title">Trending Houses</h2>
+  <div class="horizontal-scroller">
+    {% for hd in trending_houses_data %}
+    <div class="house-card">
+      <div class="house-title">
+        <a href="#">{{ hd.house.house_name }}</a>
+      </div>
+      <div class="slider-container">
+        {% for m in hd.media %}
+        <div class="slider-slide{% if forloop.first %} active{% endif %}">
+          {% if m.type == 'photo' %}
+            <img src="{{ m.file }}" alt="Media">
+          {% else %}
+            <video controls>
+              <source src="{{ m.file }}" type="video/mp4">
+            </video>
+          {% endif %}
+          {% if m.caption %}
+          <div class="slider-caption">{{ m.caption }}</div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      <div class="house-info">
+        <p><strong>Available:</strong> {{ hd.available_rooms }} | 
+           <strong>Occupied:</strong> {{ hd.occupied_rooms }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- 2) Luxury Houses -->
+  <h2 class="category-title">Luxury Houses</h2>
+  <div class="horizontal-scroller">
+    {% for hd in luxury_houses_data %}
+    <div class="house-card">
+      <!-- same structure as above -->
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- 3) Houses Near Key Locations -->
+  <h2 class="category-title">Houses Near Key Locations</h2>
+  <div class="horizontal-scroller">
+    {% for hd in key_location_houses_data %}
+    <div class="house-card"> ... </div>
+    {% endfor %}
+  </div>
+
+  <!-- 4) Houses with Outdoor Spaces, etc. -->
+  <!-- 5) Family Friendly Houses -->
+  <!-- 6) Newly Added Houses -->
+  <!-- 7) Scenic View Houses -->
+  <!-- 8) Pet Friendly Houses -->
+  <!-- 9) Short Term Rental Houses -->
+  <!-- 10) Historical Houses -->
+  <!-- 11) Fully Furnished Houses -->
+  <!-- 12) Houses with Special Discount -->
+  <!-- 13) Others -->
+
+  <script 
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+  </script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // 1) Horizontal filter bar nav
+    const filterBar = document.getElementById('filterBar');
+    const prevNav = document.querySelector('.nav-button-prev');
+    const nextNav = document.querySelector('.nav-button-next');
+    prevNav.addEventListener('click', () => {
+      filterBar.scrollBy({left: -100, behavior: 'smooth'});
+    });
+    nextNav.addEventListener('click', () => {
+      filterBar.scrollBy({left: 100, behavior: 'smooth'});
+    });
+
+    // 2) Reset button
+    const resetButton = document.getElementById('resetButton');
+    const searchForm = document.getElementById('searchForm');
+    resetButton.addEventListener('click', function() {
+      // Uncheck all booleans
+      searchForm.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+      // Reset selects
+      searchForm.querySelectorAll('select').forEach(sel => sel.selectedIndex = 0);
+      // Submit form
+      searchForm.submit();
+    });
+
+    // 3) Simple slider logic for each house card
+    const allSliders = document.querySelectorAll('.slider-container');
+    allSliders.forEach(slider => {
+      const slides = slider.querySelectorAll('.slider-slide');
+      let currentIndex = 0;
+
+      function showSlide(index) {
+        slides.forEach((sl, i) => {
+          sl.classList.toggle('active', i === index);
+        });
+      }
+      // Show first by default
+      showSlide(0);
+
+      // If you add "Prev/Next" buttons inside each .slider-container, 
+      // you can do something like:
+      // const prevBtn = slider.querySelector('.slider-btn-prev');
+      // const nextBtn = slider.querySelector('.slider-btn-next');
+      // ...
+    });
+  });
+  </script>
+</body>
+</html>
+{% endblock %}

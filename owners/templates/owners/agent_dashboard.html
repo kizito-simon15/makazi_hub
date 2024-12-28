@@ -1,0 +1,183 @@
+{% extends 'agent_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid" style="margin-top: 50px;">
+    <style>
+        /* Soft pastel background like an iOS interface */
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #eef1f5 100%);
+        }
+
+        .welcome-heading {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .welcome-heading h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+
+        .welcome-heading p {
+            font-size: 1rem;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .dashboard-row {
+            margin-top: 30px;
+        }
+
+        .dashboard-box {
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: none;
+            color: #333;
+        }
+
+        .dashboard-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .dashboard-box i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .dashboard-box h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-box p {
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+
+        .dashboard-box a.btn {
+            border-radius: 20px;
+            padding: 10px 20px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .dashboard-box a.btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Assign unique colors and backgrounds */
+        /* Details Box */
+        .box-details {
+            background-color: #e6f2ff; /* Light pastel blue */
+        }
+        .box-details i {
+            color: #3e8ef7;
+        }
+        .box-details a.btn {
+            background-color: #3e8ef7;
+            color: #ffffff;
+        }
+
+        /* Chattings Box */
+        .box-chattings {
+            background-color: #e6f7ef; /* Light pastel green */
+        }
+        .box-chattings i {
+            color: #23b574;
+        }
+        .box-chattings a.btn {
+            background-color: #23b574;
+            color: #ffffff;
+        }
+
+        /* Assigned Houses Box */
+        .box-houses {
+            background-color: #fff4e6; /* Light pastel orange */
+        }
+        .box-houses i {
+            color: #f0ad4e;
+        }
+        .box-houses a.btn {
+            background-color: #f0ad4e;
+            color: #ffffff;
+        }
+
+        /* Promotions Box */
+        .box-promotions {
+            background-color: #ffe6e6; /* Light pastel red/pink */
+        }
+        .box-promotions i {
+            color: #ff5f5f;
+        }
+        .box-promotions a.btn {
+            background-color: #ff5f5f;
+            color: #ffffff;
+        }
+
+        /* Responsive: On smaller screens, ensure proper spacing */
+        @media (max-width: 576px) {
+            .dashboard-box {
+                margin-bottom: 20px;
+            }
+
+            .welcome-heading h2 {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+
+    <!-- Welcome Heading -->
+    <div class="welcome-heading">
+        <h2>Welcome, {{ agent.first_name }} {{ agent.last_name }}, to your agent dashboard</h2>
+        <p>Manage your details, chat with clients, oversee your assigned properties, and promote them efficiently.</p>
+    </div>
+
+    <div class="row dashboard-row justify-content-center">
+        <!-- Details Box -->
+        <div class="col-md-3 col-sm-6 mb-4 d-flex align-items-stretch">
+            <div class="card dashboard-box box-details w-100">
+                <i class="fas fa-user"></i>
+                <h3>Details</h3>
+                <p>View and manage your personal details for a smooth working experience.</p>
+                <a href="{% url 'agent_only_details' %}" class="btn">View Details</a>
+            </div>
+        </div>
+
+        <!-- Chattings Box -->
+        <div class="col-md-3 col-sm-6 mb-4 d-flex align-items-stretch">
+            <div class="card dashboard-box box-chattings w-100">
+                <i class="fas fa-comments"></i>
+                <h3>Chattings</h3>
+                <p>Engage with clients seamlessly and manage conversations efficiently.</p>
+                <a href="{% url 'agent_conversations' %}" class="btn">Start Chatting</a>
+            </div>
+        </div>
+
+        <!-- Assigned Houses Box -->
+        <div class="col-md-3 col-sm-6 mb-4 d-flex align-items-stretch">
+            <div class="card dashboard-box box-houses w-100">
+                <i class="fas fa-home"></i>
+                <h3>Assigned Houses</h3>
+                <p>Promote and oversee properties entrusted to you with ease.</p>
+                <a href="{% url 'agent_houses_overview' %}" class="btn">View Houses</a>
+            </div>
+        </div>
+
+        <!-- Promotions Box -->
+        <div class="col-md-3 col-sm-6 mb-4 d-flex align-items-stretch">
+            <div class="card dashboard-box box-promotions w-100">
+                <i class="fas fa-bullhorn"></i>
+                <h3>Promotions</h3>
+                <p>Manage your promotional content, media, and campaigns for houses and rooms.</p>
+                <a href="{% url 'promotions_overview' %}" class="btn">View Promotions</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

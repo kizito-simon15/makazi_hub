@@ -1,0 +1,296 @@
+{% extends 'owner_base.html' %}
+{% load crispy_forms_tags %}
+
+{% block extra_head %}
+<!-- Bootstrap 5 CSS & Font Awesome (for icons) -->
+<link
+  href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+  rel="stylesheet"
+/>
+<script
+  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+  defer
+></script>
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+  integrity="sha512-Fo3rlrZj/kSWfYt4XK+2mMBAKpb/2n4cXp2XXcZLl9SL2k3p77Obl2Q0kPY0YWcX4DeeXL7k2kRlDbQ7PuAwzg=="
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer"
+/>
+
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: linear-gradient(135deg, #d9faff, #ffffff);
+    min-height: 100vh;
+    color: #333;
+    margin: 0;
+    padding: 0;
+  }
+
+  .iphone-card {
+    border: 0;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #ffffff, #f3f8ff);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-top: 2rem;
+  }
+
+  .iphone-card-header {
+    border-radius: 20px 20px 0 0;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    padding: 2rem;
+  }
+
+  .iphone-card-header h2 {
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+  }
+
+  .card-body {
+    padding: 2rem;
+  }
+
+  .form-label {
+    font-weight: 600;
+    color: #444;
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-label i {
+    color: #2575fc;
+    margin-right: 0.5rem;
+  }
+
+  .form-control,
+  .form-select,
+  textarea {
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    background: #fdfdfd;
+    transition: box-shadow 0.2s ease-in-out, background 0.2s ease-in-out;
+  }
+
+  .form-control:focus,
+  .form-select:focus,
+  textarea:focus {
+    box-shadow: 0 0 0 3px rgba(37,117,252,0.25);
+    border-color: #2575fc;
+    outline: none;
+    background: #ffffff;
+  }
+
+  .needs-validation button[type="submit"] {
+    border-radius: 10px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    border: none;
+    color: #fff;
+    transition: background 0.2s ease-in-out, transform 0.1s ease-in-out;
+  }
+
+  .needs-validation button[type="submit"]:hover {
+    background: linear-gradient(135deg, #5c0eb5, #1e64d4);
+    transform: translateY(-1px);
+  }
+
+  .needs-validation button[type="submit"]:active {
+    background: linear-gradient(135deg, #4e0c9d, #1b5bbb);
+    transform: translateY(1px);
+  }
+
+  .row > .col-md-4 {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .row {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-control:hover,
+  .form-select:hover,
+  textarea:hover {
+    background: #f9f9ff;
+  }
+
+  /* Progress bar container (hidden by default) */
+  #progress-container {
+    display: none; /* Show only when user submits */
+    margin-top: 2rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="card iphone-card">
+    <div class="iphone-card-header text-white text-center fw-bold">
+      <h2>
+        <i class="fas fa-tools me-2"></i> House Details - Step 2
+      </h2>
+      <p class="mb-0" style="font-weight:500;font-size:0.9rem;">
+        Provide additional details about your house
+      </p>
+    </div>
+
+    <div class="card-body">
+      <form
+        method="post"
+        class="needs-validation"
+        novalidate
+        id="create-house-step2-form"
+      >
+        {% csrf_token %}
+
+        <!-- Row 1: furnishing_status, amenities, utilities_included -->
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label class="form-label">
+              <i class="fas fa-couch"></i>Furnishing Status
+            </label>
+            {{ form.furnishing_status }}
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">
+              <i class="fas fa-parking"></i>Amenities
+            </label>
+            {{ form.amenities }}
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">
+              <i class="fas fa-water"></i>Utilities Included
+            </label>
+            {{ form.utilities_included }}
+          </div>
+        </div>
+
+        <!-- Row 2: house_type, flooring_and_finishing, land_size -->
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label class="form-label">
+              <i class="fas fa-building"></i>House Type
+            </label>
+            {{ form.house_type }}
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">
+              <i class="fas fa-fill-drip"></i>Flooring and Finishing
+            </label>
+            {{ form.flooring_and_finishing }}
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">
+              <i class="fas fa-ruler-combined"></i>Land Size
+            </label>
+            {{ form.land_size }}
+          </div>
+        </div>
+
+        <!-- Row 3: proximity_information, rules_and_restrictions, contact_information -->
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label class="form-label">
+              <i class="fas fa-map-marker-alt"></i>Proximity Information
+            </label>
+            {{ form.proximity_information }}
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">
+              <i class="fas fa-gavel"></i>Rules and Restrictions
+            </label>
+            {{ form.rules_and_restrictions }}
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">
+              <i class="fas fa-phone-alt"></i>Contact Information
+            </label>
+            {{ form.contact_information }}
+          </div>
+        </div>
+
+        <!-- Row 4: insurance_details -->
+        <div class="row">
+          <div class="col-md-12 mb-3">
+            <label class="form-label">
+              <i class="fas fa-shield-alt"></i>Insurance Details
+            </label>
+            {{ form.insurance_details }}
+          </div>
+        </div>
+
+        <div class="d-grid mt-4">
+          <button
+            type="submit"
+            class="btn btn-primary btn-lg shadow"
+          >
+            <i class="fas fa-check-circle me-2"></i> Save and Continue
+          </button>
+        </div>
+
+        <!-- PROGRESS BAR (hidden initially) -->
+        <div id="progress-container" class="mt-4">
+          <div class="progress">
+            <div
+              id="progress-bar"
+              class="progress-bar progress-bar-striped progress-bar-animated"
+              role="progressbar"
+              style="width: 0%"
+              aria-valuenow="0"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+              0%
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const step2Form = document.getElementById('create-house-step2-form');
+  const progressContainer = document.getElementById('progress-container');
+  const progressBar = document.getElementById('progress-bar');
+
+  step2Form.addEventListener('submit', function(e) {
+    e.preventDefault(); // Prevent immediate form submission
+
+    // Show the progress bar container
+    progressContainer.style.display = 'block';
+
+    // Disable the submit button to avoid multiple clicks
+    const submitButton = step2Form.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+
+    let progress = 0;
+    const step = 10;         // how many % we jump each time
+    const intervalSpeed = 200; // ms interval between increments
+
+    const fakeUploadInterval = setInterval(() => {
+      progress += step;
+      if (progress > 100) {
+        progress = 100;
+      }
+
+      progressBar.style.width = progress + '%';
+      progressBar.setAttribute('aria-valuenow', progress);
+      progressBar.textContent = progress + '%';
+
+      // Once we reach 100, submit the form for real
+      if (progress >= 100) {
+        clearInterval(fakeUploadInterval);
+        step2Form.submit();
+      }
+    }, intervalSpeed);
+  });
+});
+</script>
+{% endblock %}

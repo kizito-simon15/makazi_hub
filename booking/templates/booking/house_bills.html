@@ -1,0 +1,89 @@
+{% extends "owner_base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Header with Title and Create Button -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary fw-bold">
+            <i class="bi bi-receipt me-2"></i>House Bills
+        </h2>
+        <a href="{% url 'create_bills' %}" class="btn btn-success btn-lg shadow-sm">
+            <i class="bi bi-plus-circle-fill me-2"></i>Create Bill
+        </a>
+    </div>
+
+    {% if houses_with_bills %}
+        {% for house_data in houses_with_bills %}
+        <div class="card mb-4 shadow-lg">
+            <!-- House Details -->
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-house-door-fill me-2"></i>{{ house_data.house.house_name }}
+                </h4>
+                <p class="mb-0">
+                    <i class="bi bi-geo-alt-fill me-2"></i>{{ house_data.house.region }},
+                    {{ house_data.house.district }},
+                    {{ house_data.house.ward }}
+                </p>
+            </div>
+
+            <div class="card-body">
+                {% if house_data.bills %}
+                <!-- Bills Table -->
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-primary">
+                            <tr class="text-center">
+                                <th><i class="bi bi-hash me-1"></i>S/N</th>
+                                <th><i class="bi bi-card-text me-1"></i>Title</th>
+                                <th><i class="bi bi-justify-left me-1"></i>Description</th>
+                                <th><i class="bi bi-currency-dollar me-1"></i>Amount (TZS)</th>
+                                <th><i class="bi bi-calendar2-event-fill me-1"></i>Validity Period</th>
+                                <th><i class="bi bi-clock-history me-1"></i>Created At</th>
+                                <th><i class="bi bi-pencil me-1"></i>Updated At</th>
+                                <th><i class="bi bi-tools me-1"></i>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for bill in house_data.bills %}
+                            <tr>
+                                <td class="text-center">{{ forloop.counter }}</td>
+                                <td>{{ bill.title }}</td>
+                                <td>{{ bill.description }}</td>
+                                <td class="text-end">{{ bill.amount|floatformat:2 }}</td>
+                                <td>{{ bill.validity_period }}</td>
+                                <td>{{ bill.created_at|date:"M d, Y H:i" }}</td>
+                                <td>{{ bill.updated_at|date:"M d, Y H:i" }}</td>
+                                <td class="text-center">
+                                    <!-- Update Button -->
+                                    <a href="{% url 'update_bill' bill.id %}" class="btn btn-warning btn-sm me-2 shadow-sm">
+                                        <i class="bi bi-pencil-square"></i> Update
+                                    </a>
+                                    <!-- Delete Button -->
+                                    <a href="{% url 'delete_bill' bill.id %}" class="btn btn-danger btn-sm shadow-sm">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <!-- No Bills Found -->
+                <div class="alert alert-warning text-center">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>No bills found for this house.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <!-- No Bills Found for Any House -->
+        <div class="alert alert-warning text-center">
+            <i class="bi bi-exclamation-circle-fill me-2"></i>No bills found for any house.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

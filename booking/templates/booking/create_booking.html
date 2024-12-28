@@ -1,0 +1,261 @@
+{% extends 'client_base.html' %}
+{% load static %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="..." crossorigin="anonymous">
+<style>
+    :root {
+        --primary-color: #007aff; /* iOS-like blue */
+        --accent-color: #34C759; /* Bright green accent */
+        --warning-color: #ffcc00; /* iOS-like yellow (for warnings) */
+        --danger-color: #ff3b30; /* iOS-like red (for emphasis) */
+        --info-color: #5ac8fa;   /* iOS-like light blue (for info) */
+        --card-bg: #ffffff;
+        --bg-color: #f7f7f7;
+        --text-color: #333;
+        --card-shadow: rgba(0,0,0,0.1);
+    }
+
+    body {
+        background: var(--bg-color);
+        color: var(--text-color);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+        margin: 0;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: 2rem auto;
+    }
+
+    .card {
+        border: none;
+        border-radius: 20px;
+        background-color: var(--card-bg);
+        box-shadow: 0 4px 6px var(--card-shadow);
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 12px var(--card-shadow);
+    }
+
+    .card-header {
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+        background: linear-gradient(135deg, #4caf50, #81c784);
+        color: #fff;
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .card-header h2 {
+        margin: 0;
+        font-size: 1.75rem;
+        font-weight: 700;
+    }
+
+    .card-body {
+        padding: 2rem;
+        background-color: #f9f9f9;
+    }
+
+    h5 {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    h5 i {
+        margin-right: 0.5rem;
+    }
+
+    .info-box {
+        background-color: #ffffff;
+        border-radius: 15px;
+        margin-bottom: 1.5rem;
+        padding: 1.5rem;
+        box-shadow: 0 2px 4px var(--card-shadow);
+    }
+
+    .info-box h5 {
+        font-size: 1.1rem;
+        color: var(--text-color);
+    }
+
+    .info-box p, .info-box li {
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+
+    .list-group-item {
+        border: none;
+        background-color: transparent;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .list-group-item strong {
+        color: var(--text-color);
+    }
+
+    .form-check {
+        background: #fefefe;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        padding: 1rem;
+        transition: background 0.2s;
+    }
+
+    .form-check:hover {
+        background: #f8f8f8;
+    }
+
+    .form-check-input {
+        margin-top: 0.3rem;
+    }
+
+    .payment-logo {
+        height: 40px;
+        width: auto;
+    }
+
+    .btn {
+        border-radius: 20px;
+        font-weight: 600;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .btn-success {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+        color: #fff;
+    }
+
+    .btn-success:hover {
+        background-color: #28a745;
+    }
+
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+    }
+
+    .alert-warning {
+        border-radius: 10px;
+    }
+
+    @media (max-width: 768px) {
+        .card-header {
+            padding: 1.5rem;
+        }
+
+        .card-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .card-body {
+            padding: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <!-- Header Section -->
+        <div class="card-header">
+            <h2 class="mb-0">
+                <i class="fas fa-door-open me-2"></i>Create Booking for Room {{ room.room_number }}
+            </h2>
+        </div>
+
+        <!-- Body Section -->
+        <div class="card-body">
+
+            <div class="info-box mb-4">
+                <h5 class="text-primary"><i class="fas fa-home me-2"></i>House:</h5>
+                <p class="mb-2"><strong>{{ house.house_name }}</strong></p>
+
+                <h5 class="text-primary"><i class="fas fa-info-circle me-2"></i>Room Description:</h5>
+                <p>{{ room.description|default:"No description provided." }}</p>
+
+                <h5 class="text-success"><i class="fas fa-tag me-2"></i>Rental Price:</h5>
+                <p><strong>{{ room.rental_price }} TZS</strong> (per month)</p>
+            </div>
+
+            {% if rule %}
+            <div class="info-box mb-4">
+                <h5 class="text-warning"><i class="fas fa-calendar-alt me-2"></i>Booking Details:</h5>
+                <ul class="list-group mb-3">
+                    <li class="list-group-item"><strong>Minimum Months to Pay:</strong> {{ rule.minimum_months_to_pay }}</li>
+                    <li class="list-group-item"><strong>Total Amount to Pay:</strong> {{ total_amount_to_pay }} TZS</li>
+                    <li class="list-group-item"><strong>Initial Amount to Owner:</strong> {{ initial_amount_to_owner }} TZS</li>
+                    <li class="list-group-item"><strong>Amount to Agent:</strong> {{ amount_to_agent }} TZS</li>
+                </ul>
+
+                <h5 class="text-danger"><i class="fas fa-file-alt me-2"></i>Payment Terms:</h5>
+                <p>{{ rule.payment_terms|linebreaks }}</p>
+            </div>
+            {% else %}
+            <div class="alert alert-warning text-center">
+                <i class="fas fa-exclamation-circle me-2"></i>No specific booking rules for this room.
+            </div>
+            {% endif %}
+
+            <!-- Payment Methods -->
+            <div class="info-box mb-4">
+                <h5 class="text-info"><i class="fas fa-money-bill-wave me-2"></i>Select Payment Method:</h5>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        {% for payment in payment_methods %}
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check d-flex align-items-center">
+                                <input class="form-check-input me-2" type="radio" name="payment_method" id="payment{{ payment.id }}" value="{{ payment.id }}">
+                                <label class="form-check-label d-flex align-items-center" for="payment{{ payment.id }}">
+                                    {% if payment.provider == 'M-Pesa' %}
+                                        <img src="{% static 'images/mpesa.png' %}" alt="M-Pesa" class="payment-logo me-2">
+                                    {% elif payment.provider == 'Yas' %}
+                                        <img src="{% static 'images/tigopesa.png' %}" alt="Tigo Pesa" class="payment-logo me-2">
+                                    {% elif payment.provider == 'Airtel Money' %}
+                                        <img src="{% static 'images/airtelmoney.png' %}" alt="Airtel Money" class="payment-logo me-2">
+                                    {% elif payment.provider == 'Halopesa' %}
+                                        <img src="{% static 'images/halopesa.png' %}" alt="Halo Pesa" class="payment-logo me-2">
+                                    {% elif payment.provider == 'PayPal' %}
+                                        <img src="{% static 'images/paypal.png' %}" alt="PayPal" class="payment-logo me-2">
+                                    {% elif payment.provider == 'Stripe' %}
+                                        <img src="{% static 'images/stripe.png' %}" alt="Stripe" class="payment-logo me-2">
+                                    {% elif payment.provider == 'CRDB Bank' %}
+                                        <img src="{% static 'images/crdb.png' %}" alt="CRDB Bank" class="payment-logo me-2">
+                                    {% elif payment.provider == 'Azam Pesa' %}
+                                        <img src="{% static 'images/azam.png' %}" alt="Azam Pesa" class="payment-logo me-2">
+                                    {% elif payment.provider == 'Exim Bank' %}
+                                        <img src="{% static 'images/exim.png' %}" alt="Exim Bank" class="payment-logo me-2">
+                                    {% elif payment.provider == 'NMB Bank' %}
+                                        <img src="{% static 'images/nmb.png' %}" alt="NMB Bank" class="payment-logo me-2">
+                                    {% else %}
+                                        <span class="me-2">{{ payment.provider }}</span>
+                                    {% endif %}
+                                    <span>{{ payment.method_name }} - {{ payment.account_details }}</span>
+                                </label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-check-circle me-2"></i>Confirm Booking
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

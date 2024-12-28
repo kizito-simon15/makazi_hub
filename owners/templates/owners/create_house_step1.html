@@ -1,0 +1,536 @@
+{% extends 'owner_base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block extra_head %}
+<!-- Bootstrap 5 CSS & Font Awesome (for icons) -->
+<link
+  href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+  rel="stylesheet"
+/>
+<script
+  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+  defer
+></script>
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+  integrity="sha512-Fo3rlrZj/kSWfYt4XK+2mMBAKpb/2n4cXp2XXcZLl9SL2k3p77Obl2Q0kPY0YWcX4DeeXL7k2kRlDbQ7PuAwzg=="
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer"
+/>
+
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: linear-gradient(135deg, #d9faff, #ffffff);
+    min-height: 100vh;
+    color: #333;
+    margin: 0;
+    padding: 0;
+  }
+
+  .iphone-card {
+    border: 0;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #ffffff, #f3f8ff);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-top: 2rem;
+  }
+
+  .iphone-card-header {
+    border-radius: 20px 20px 0 0;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    padding: 2rem;
+  }
+
+  .iphone-card-header h2 {
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+  }
+
+  .card-body {
+    padding: 2rem;
+  }
+
+  .form-label {
+    font-weight: 600;
+    color: #444;
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-label i {
+    color: #2575fc;
+    margin-right: 0.5rem;
+  }
+
+  .form-control, .form-select {
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    background: #fdfdfd;
+    transition: box-shadow 0.2s ease-in-out, background 0.2s ease-in-out;
+  }
+
+  .form-control:focus, .form-select:focus {
+    box-shadow: 0 0 0 3px rgba(37,117,252,0.25);
+    border-color: #2575fc;
+    outline: none;
+    background: #ffffff;
+  }
+
+  .needs-validation button[type="submit"] {
+    border-radius: 10px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    border: none;
+    color: #fff;
+    transition: background 0.2s ease-in-out, transform 0.1s ease-in-out;
+  }
+
+  .needs-validation button[type="submit"]:hover {
+    background: linear-gradient(135deg, #5c0eb5, #1e64d4);
+    transform: translateY(-1px);
+  }
+
+  .needs-validation button[type="submit"]:active {
+    background: linear-gradient(135deg, #4e0c9d, #1b5bbb);
+    transform: translateY(1px);
+  }
+
+  .row > .col-md-4 {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .row {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-control:hover, .form-select:hover {
+    background: #f9f9ff;
+  }
+
+  /* Hide district, ward, street fields initially */
+  #district-field,
+  #ward-field,
+  #street-field {
+    display: none;
+  }
+
+  /* Camera preview styles */
+  #camera-container {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 1rem;
+    gap: 1rem;
+  }
+  #camera-video {
+    max-width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  #no-camera-msg {
+    display: none;
+    color: red;
+    font-weight: 600;
+  }
+  #profile_picture_preview img {
+    max-width: 150px;
+    max-height: 150px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-top: 1rem;
+  }
+  #take-picture-btn, #capture-btn, #switch-camera-btn {
+    border-radius: 10px;
+    font-weight: 600;
+    margin-left:10px;
+  }
+  #capture-btn, #switch-camera-btn {
+    margin-top:10px;
+  }
+  #camera-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  /* Progress bar container (hidden by default) */
+  #progress-container {
+    display: none; /* Show only when user submits */
+    margin-top: 2rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="card iphone-card">
+    <div class="card-header iphone-card-header text-white text-center fw-bold">
+      <h2><i class="fas fa-home me-2"></i>Add a New House - Step 1</h2>
+    </div>
+    <div class="card-body">
+      <form 
+        method="post" 
+        enctype="multipart/form-data" 
+        class="needs-validation" 
+        novalidate 
+        id="create-house-step1-form"
+      >
+        {% csrf_token %}
+
+        <!-- Row 1: profile_picture, region -->
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label for="id_profile_picture" class="form-label">
+              <i class="fas fa-image"></i>Profile Picture
+            </label>
+            <div class="d-flex align-items-center">
+              {{ form.profile_picture }}
+              <button 
+                type="button" 
+                class="btn btn-outline-primary ms-2" 
+                id="take-picture-btn"
+              >
+                <i class="fas fa-camera"></i>
+              </button>
+            </div>
+            <div id="no-camera-msg">No camera found</div>
+            <div id="camera-container">
+              <video id="camera-video" autoplay playsinline muted></video>
+              <div id="camera-buttons">
+                <button 
+                  type="button" 
+                  class="btn btn-secondary" 
+                  id="switch-camera-btn" 
+                  title="Switch Camera"
+                >
+                  <i class="fas fa-sync-alt"></i>
+                </button>
+                <button 
+                  type="button" 
+                  class="btn btn-success" 
+                  id="capture-btn"
+                >
+                  <i class="fas fa-check-circle"></i>
+                </button>
+              </div>
+            </div>
+            <div id="profile_picture_preview"></div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="id_region" class="form-label">
+              <i class="fas fa-map-marker-alt"></i>Region
+            </label>
+            {{ form.region }}
+          </div>
+          <div class="col-md-4"></div>
+        </div>
+
+        <!-- Row 2: district, ward, street (hidden initially) -->
+        <div class="row">
+          <div class="col-md-4 mb-3" id="district-field">
+            <label for="id_district" class="form-label">
+              <i class="fas fa-city"></i>District
+            </label>
+            {{ form.district }}
+          </div>
+          <div class="col-md-4 mb-3" id="ward-field">
+            <label for="id_ward" class="form-label">
+              <i class="fas fa-map"></i>Ward
+            </label>
+            {{ form.ward }}
+          </div>
+          <div class="col-md-4 mb-3" id="street-field">
+            <label for="id_street" class="form-label">
+              <i class="fas fa-road"></i>Street
+            </label>
+            {{ form.street }}
+          </div>
+        </div>
+
+        <!-- Row 3: house_number, house_name, number_of_rooms -->
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label for="id_house_number" class="form-label">
+              <i class="fas fa-hashtag"></i>House Number
+            </label>
+            {{ form.house_number }}
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="id_house_name" class="form-label">
+              <i class="fas fa-home"></i>House Name
+            </label>
+            {{ form.house_name }}
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="id_number_of_rooms" class="form-label">
+              <i class="fas fa-door-open"></i>Number of Rooms
+            </label>
+            {{ form.number_of_rooms }}
+          </div>
+        </div>
+
+        <div class="d-grid mt-4">
+          <button 
+            type="submit" 
+            class="btn btn-primary btn-lg shadow"
+          >
+            <i class="fas fa-arrow-circle-right me-2"></i> Continue to Next Step
+          </button>
+        </div>
+
+        <!-- PROGRESS BAR (initially hidden) -->
+        <div id="progress-container" class="mt-4">
+          <div class="progress">
+            <div 
+              id="progress-bar"
+              class="progress-bar progress-bar-striped progress-bar-animated"
+              role="progressbar"
+              style="width:0%"
+              aria-valuenow="0"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+              0%
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Audio for camera sound -->
+<audio id="camera-sound" src="{% static 'audio/camera.mp3' %}" preload="auto"></audio>
+
+<!-- Preloaded JSON Data -->
+<script>
+  const regions = {{ regions_json|safe }};
+  const districts = {{ districts_json|safe }};
+  const wards = {{ wards_json|safe }};
+  const streets = {{ streets_json|safe }};
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const regionSelect = document.getElementById("id_region");
+  const districtSelect = document.getElementById("id_district");
+  const wardSelect = document.getElementById("id_ward");
+  const streetSelect = document.getElementById("id_street");
+
+  const districtField = document.getElementById("district-field");
+  const wardField = document.getElementById("ward-field");
+  const streetField = document.getElementById("street-field");
+
+  // Hide these fields initially
+  districtField.style.display = "none";
+  wardField.style.display = "none";
+  streetField.style.display = "none";
+
+  regionSelect.addEventListener("change", function() {
+    const regionId = parseInt(this.value, 10);
+    if (regionId) {
+      const filteredDistricts = districts.filter(d => d.region_id === regionId);
+      districtSelect.innerHTML = "<option value=''>---------</option>";
+      filteredDistricts.forEach(d => {
+        const opt = document.createElement("option");
+        opt.value = d.id;
+        opt.textContent = d.name;
+        districtSelect.appendChild(opt);
+      });
+
+      districtField.style.display = "block";
+      wardField.style.display = "none";
+      streetField.style.display = "none";
+      wardSelect.innerHTML = "<option value=''>---------</option>";
+      streetSelect.innerHTML = "<option value=''>---------</option>";
+
+    } else {
+      districtField.style.display = "none";
+      wardField.style.display = "none";
+      streetField.style.display = "none";
+      districtSelect.innerHTML = "<option value=''>---------</option>";
+      wardSelect.innerHTML = "<option value=''>---------</option>";
+      streetSelect.innerHTML = "<option value=''>---------</option>";
+    }
+  });
+
+  districtSelect.addEventListener("change", function() {
+    const districtId = parseInt(this.value, 10);
+    if (districtId) {
+      const filteredWards = wards.filter(w => w.district_id === districtId);
+      wardSelect.innerHTML = "<option value=''>---------</option>";
+      filteredWards.forEach(w => {
+        const opt = document.createElement("option");
+        opt.value = w.id;
+        opt.textContent = w.name;
+        wardSelect.appendChild(opt);
+      });
+
+      wardField.style.display = "block";
+      streetField.style.display = "none";
+      streetSelect.innerHTML = "<option value=''>---------</option>";
+    } else {
+      wardField.style.display = "none";
+      streetField.style.display = "none";
+      wardSelect.innerHTML = "<option value=''>---------</option>";
+      streetSelect.innerHTML = "<option value=''>---------</option>";
+    }
+  });
+
+  wardSelect.addEventListener("change", function() {
+    const wardId = parseInt(this.value, 10);
+    if (wardId) {
+      const filteredStreets = streets.filter(s => s.ward_id === wardId);
+      streetSelect.innerHTML = "<option value=''>---------</option>";
+      filteredStreets.forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = s.id;
+        opt.textContent = s.name;
+        streetSelect.appendChild(opt);
+      });
+
+      streetField.style.display = "block";
+    } else {
+      streetField.style.display = "none";
+      streetSelect.innerHTML = "<option value=''>---------</option>";
+    }
+  });
+
+  // -----------------------
+  // CAMERA LOGIC FOR PROFILE PICTURE
+  // -----------------------
+  const profileInput = document.getElementById("id_profile_picture");
+  const takePictureBtn = document.getElementById("take-picture-btn");
+  const cameraContainer = document.getElementById("camera-container");
+  const cameraVideo = document.getElementById("camera-video");
+  const captureBtn = document.getElementById("capture-btn");
+  const noCameraMsg = document.getElementById("no-camera-msg");
+  const previewContainer = document.getElementById("profile_picture_preview");
+  const cameraSound = document.getElementById("camera-sound");
+  const switchCameraBtn = document.getElementById("switch-camera-btn");
+
+  let mediaStream = null;
+  let currentFacingMode = "user"; // Default to front-facing camera
+
+  async function startCamera() {
+    noCameraMsg.style.display = "none";
+    if (mediaStream) {
+      mediaStream.getTracks().forEach(track => track.stop());
+      mediaStream = null;
+    }
+    try {
+      const constraints = { video: { facingMode: currentFacingMode } };
+      mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+      cameraVideo.srcObject = mediaStream;
+    } catch (error) {
+      cameraContainer.style.display = "none";
+      noCameraMsg.style.display = "block";
+    }
+  }
+
+  takePictureBtn.addEventListener("click", function() {
+    previewContainer.innerHTML = "";
+    cameraContainer.style.display = "flex";
+    startCamera();
+  });
+
+  switchCameraBtn.addEventListener("click", function() {
+    currentFacingMode = (currentFacingMode === "user") ? "environment" : "user";
+    startCamera();
+  });
+
+  captureBtn.addEventListener("click", function() {
+    if (mediaStream) {
+      // Play camera sound
+      cameraSound.currentTime = 0;
+      cameraSound.play().catch(err => console.error("Audio play error:", err));
+
+      const track = mediaStream.getTracks()[0];
+      if (!track) return;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = cameraVideo.videoWidth;
+      canvas.height = cameraVideo.videoHeight;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(cameraVideo, 0, 0, canvas.width, canvas.height);
+
+      canvas.toBlob((blob) => {
+        // Create a file from the blob
+        const file = new File([blob], "profile_picture.png", { type: "image/png" });
+
+        // Put file into the input
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        profileInput.files = dataTransfer.files;
+
+        // Show preview
+        previewContainer.innerHTML = "";
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(blob);
+        previewContainer.appendChild(img);
+
+        // Stop camera
+        track.stop();
+        mediaStream = null;
+        cameraContainer.style.display = "none";
+      }, "image/png");
+    }
+  });
+
+  // If user uploads normally, also show preview
+  profileInput.addEventListener("change", function() {
+    previewContainer.innerHTML = "";
+    const file = profileInput.files[0];
+    if (file) {
+      const img = document.createElement("img");
+      img.src = URL.createObjectURL(file);
+      previewContainer.appendChild(img);
+    }
+  });
+
+  // -----------------------
+  // FAKE PROGRESS BAR LOGIC
+  // -----------------------
+  const step1Form = document.getElementById("create-house-step1-form");
+  const progressContainer = document.getElementById("progress-container");
+  const progressBar = document.getElementById("progress-bar");
+
+  step1Form.addEventListener("submit", function(e) {
+    e.preventDefault(); // Prevent immediate form submit
+
+    // Show the progress bar container
+    progressContainer.style.display = "block";
+
+    // Disable the submit button
+    const submitButton = step1Form.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+
+    let progress = 0;
+    const step = 10;        // increase by 10% each interval
+    const intervalSpeed = 200; // 200ms between increments
+
+    const fakeInterval = setInterval(() => {
+      progress += step;
+      if (progress > 100) progress = 100;
+
+      progressBar.style.width = progress + "%";
+      progressBar.setAttribute("aria-valuenow", progress);
+      progressBar.textContent = progress + "%";
+
+      if (progress >= 100) {
+        clearInterval(fakeInterval);
+        // Once we reach 100%, actually submit the form
+        step1Form.submit();
+      }
+    }, intervalSpeed);
+  });
+});
+</script>
+{% endblock %}

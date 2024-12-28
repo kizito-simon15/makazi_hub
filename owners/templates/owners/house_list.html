@@ -1,0 +1,938 @@
+{% extends 'owner_base.html' %}
+{% load crispy_forms_tags %}
+
+{% block extra_head %}
+<!-- Bootstrap CSS -->
+<link
+  href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+  rel="stylesheet"
+  integrity="sha384-ENjdO4Dr2bk+U6ALCqujdN9OA+PGFfpqOjGkL5/hJRYX0F0DYTkHmJ6fS/hZyXy5"
+  crossorigin="anonymous"
+/>
+<!-- Font Awesome -->
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+/>
+<!-- Bootstrap Icons -->
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+/>
+
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: linear-gradient(135deg, #d9faff, #ffffff);
+    min-height: 100vh;
+    color: #333;
+    margin: 0;
+    padding: 0;
+  }
+
+  .iphone-card {
+    border: 0;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #ffffff, #f3f8ff);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .iphone-card-header {
+    border-radius: 20px 20px 0 0;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    padding: 1.5rem;
+  }
+
+  .iphone-card-header h2 {
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    font-size: 1.25rem;
+  }
+
+  .card-body {
+    padding: 1.5rem;
+  }
+
+  .badge {
+    border-radius: 10px;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+  }
+
+  .accordion-button {
+    border: none;
+    border-radius: 10px;
+    background: #f3f8ff;
+    font-weight: 600;
+  }
+
+  .accordion-button.collapsed {
+    background: #ffffff;
+    box-shadow: none;
+  }
+
+  .accordion-item {
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+
+  .accordion-body {
+    background: #ffffff;
+    border-radius: 10px;
+  }
+
+  .btn-success,
+  .btn-danger,
+  .btn-info,
+  .btn-warning,
+  .btn-primary {
+    border-radius: 10px;
+    font-weight: 600;
+  }
+
+  .no-rooms {
+    font-weight: 600;
+    color: #555;
+    font-size: 0.9rem;
+  }
+
+  /* Media slider styles */
+  .media-slider {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .media-slide {
+    display: none;
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin: auto;
+  }
+
+  .media-slide.video-slide video {
+    width: 100%;
+    height: auto;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+
+  .slider-controls {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    transform: translateY(-50%);
+    padding: 0 1rem;
+  }
+
+  .slider-controls button {
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.3);
+    color: #fff;
+    border: none;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+  }
+
+  .media-caption {
+    font-size: 0.85rem;
+    color: #555;
+    margin-top: 0.5rem;
+    font-style: italic;
+  }
+
+  .section-actions {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .section-actions a {
+    margin-right: 0.5rem;
+  }
+
+  /* Dropdown styling for location icon */
+  .location-dropdown {
+    position: relative;
+    display: inline-block;
+  }
+
+  .location-dropdown .dropdown-toggle {
+    color: #fff !important;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+
+  .location-dropdown .dropdown-menu {
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .location-dropdown .dropdown-item {
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .location-dropdown .dropdown-item i {
+    font-size: 1rem;
+    color: #007aff;
+  }
+
+  .bool-icon {
+    font-size: 1.2rem;
+    margin-left: 0.4rem;
+    vertical-align: middle;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-primary fw-bold">My Houses</h2>
+    <a href="{% url 'create_house_step1' %}" class="btn btn-success btn-lg shadow-sm">
+      <i class="bi bi-plus-circle-fill me-2"></i>Create House
+    </a>
+  </div>
+
+  {% if houses %}
+  <div class="row g-4 {% if houses|length == 1 %}justify-content-center{% endif %}">
+    {% for house in houses %}
+    <div class="col-12 col-md-6 col-lg-4 d-flex">
+      <div class="card iphone-card flex-fill">
+        <!-- Card Header -->
+        <div class="iphone-card-header text-white fw-bold text-center">
+          <h2>
+            <i class="bi bi-house-door-fill me-2"></i>{{ house.house_name }}
+            <!-- Location dropdown -->
+            <div
+              class="location-dropdown dropdown"
+              style="display:inline-block;margin-left:5px;"
+            >
+              <button
+                class="dropdown-toggle"
+                type="button"
+                id="locationDropdown{{ house.id }}"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <i class="fas fa-map-marker-alt" style="color:#fff;"></i>
+              </button>
+              <ul
+                class="dropdown-menu dropdown-menu-end"
+                aria-labelledby="locationDropdown{{ house.id }}"
+              >
+                <li>
+                  <a class="dropdown-item" href="{% url 'add_house_location' house.id %}">
+                    <i class="fas fa-plus-circle"></i>Create/update Location
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'house_location_detail' house.id %}">
+                    <i class="fas fa-map"></i>View Location
+                  </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{% url 'update_house_step1_features' house.id %}">
+                      <i class="fas fa-map"></i>Update additional details step1
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="{% url 'update_house_step3_features' house.id %}">
+                      <i class="fas fa-map"></i>Update additional details step2
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="{% url 'update_house_rent_as_whole' house.id %}">
+                      <i class="fas fa-map"></i>Update last step
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="{% url 'create_house_update' house.id %}">
+                      <i class="fas fa-map"></i>Create your status
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="{% url 'house_updates' house.id %}">
+                      <i class="fas fa-map"></i>View your status
+                    </a>
+                  </li>
+              </ul>
+            </div>
+          </h2>
+        </div>
+
+        <!-- Card Body -->
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3">
+            {% if house.profile_picture %}
+              <img
+                src="{{ house.profile_picture.url }}"
+                alt="Profile Picture"
+                class="rounded-circle me-3"
+                style="width:60px; height:60px; object-fit:cover;"
+              />
+            {% else %}
+              <i
+                class="bi bi-person-circle text-secondary me-3"
+                style="font-size:2rem;"
+              ></i>
+            {% endif %}
+            <div>
+              <p class="mb-0 text-dark fw-bold">
+                {{ house.owner.first_name }} {{ house.owner.surname }}
+              </p>
+              <p class="mb-0 text-muted" style="font-size:0.9rem;">
+                {{ house.region.name }}, {{ house.district.name }},
+                {{ house.ward.name }}, {{ house.street.name }},
+                {{ house.house_number }}
+              </p>
+            </div>
+          </div>
+
+          <p class="mb-1">
+            <strong>Furnishing:</strong> {{ house.furnishing_status }}
+          </p>
+          <p class="mb-1">
+            <strong>Type:</strong> {{ house.house_type }}
+          </p>
+          <p class="mb-1">
+            <strong>Amenities:</strong> {{ house.amenities }}
+          </p>
+          <p class="mb-1">
+            <strong>Utilities included:</strong> {{ house.utilities_included }}
+          </p>
+          <p class="mb-1">
+            <strong>Land size:</strong> {{ house.land_size }}
+          </p>
+          <p class="mb-1">
+            <strong>Proximity informations:</strong> {{ house.proximity_information }}
+          </p>
+          <p class="mb-1">
+            <strong>Rules and restrictions:</strong> {{ house.rules_and_restrictions }}
+          </p>
+          <p class="mb-1">
+            <strong>Contact informations:</strong> {{ house.contact_information }}
+          </p>
+          <p class="mb-1">
+            <strong>Insurance details:</strong> {{ house.insurance_details }}
+          </p>
+          <p class="mb-1">
+            <strong>The rent for the whole house:</strong>
+            {{ house.rent_for_whole_house }}
+          </p>
+
+          <!-- BEGIN Additional Boolean Details -->
+          <h5 class="mt-4 fw-bold text-secondary">
+            <i class="fas fa-info-circle me-2 text-primary"></i>Additional Details
+          </h5>
+
+          <p class="mb-1">
+            <strong>Is Furnished?</strong>
+            {% if house.is_furnished %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Has Swimming Pool?</strong>
+            {% if house.has_swimming_pool %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Has WiFi?</strong>
+            {% if house.has_wifi %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Has Backup Generator?</strong>
+            {% if house.has_backup_generator %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Has Water Services?</strong>
+            {% if house.has_water_services %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Is Smart Home?</strong>
+            {% if house.is_smart_home %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Has Playground?</strong>
+            {% if house.has_playground %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Has Parking?</strong>
+            {% if house.has_parking %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Has Fence?</strong>
+            {% if house.has_fence %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Has CCTV Cameras?</strong>
+            {% if house.has_cctv_cameras %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Has Security Guard?</strong>
+            {% if house.has_security_guard %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Has Grill Doors/Windows?</strong>
+            {% if house.has_grill_doors_and_windows %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Is Modern Design?</strong>
+            {% if house.is_modern_design %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Has Multiple Floors?</strong>
+            {% if house.has_floors %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Has Outdoor Seating Area?</strong>
+            {% if house.has_outdoor_seating_area %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Has Garden?</strong>
+            {% if house.has_garden %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Has Entertaining Area?</strong>
+            {% if house.has_entertaining_area %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Has Rooftop for Resting?</strong>
+            {% if house.has_rooftop_for_resting %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Is Disability Friendly?</strong>
+            {% if house.is_disability_friendly %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Is Near Pollution Sites?</strong>
+            {% if house.is_near_pollution_sites %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Has Elevator?</strong>
+            {% if house.has_elevator %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Is Near Schools?</strong>
+            {% if house.is_near_schools %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Is Near Hospital?</strong>
+            {% if house.is_near_hospital %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Is Near Ocean/River/Lake?</strong>
+            {% if house.is_near_ocean_river_lake %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Is in Quiet Area?</strong>
+            {% if house.is_in_quiet_area %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Is Near Commercial Center?</strong>
+            {% if house.is_near_commercial_center %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Has Historical Significance?</strong>
+            {% if house.has_historical_significance %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Was Stayed by Celebrity?</strong>
+            {% if house.was_stayed_by_celebrity %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Allows Installment Payment?</strong>
+            {% if house.allows_installment_payment %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Rent Includes Other Services?</strong>
+            {% if house.rent_includes_other_services %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Is Trending?</strong>
+            {% if house.is_trending %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <strong>Is Rented As Whole?</strong>
+            {% if house.is_rented_as_whole %}
+              <i class="fas fa-check-circle text-success bool-icon"></i>
+            {% else %}
+              <i class="fas fa-times-circle text-danger bool-icon"></i>
+            {% endif %}
+          </p>
+          <!-- END Additional Boolean Details -->
+
+          <p class="mb-1">
+            <strong>Rooms:</strong>
+            <span class="badge bg-primary text-white">Total: {{ house.total_rooms }}</span>
+            <span class="badge bg-danger text-white">Occupied: {{ house.occupied_rooms }}</span>
+            <span class="badge bg-success text-white">Available: {{ house.available_rooms }}</span>
+          </p>
+
+          <!-- House Media Slider (Combined House + Promotion Medias) -->
+          <h5 class="mt-4 fw-bold text-secondary">
+            <i class="fas fa-photo-video me-2 text-primary"></i>House Media
+          </h5>
+          {% if house.combined_house_medias %}
+            <div
+              class="media-slider house-media-slider"
+              data-house-id="{{ house.id }}"
+            >
+              {% for media in house.combined_house_medias %}
+                {% if media.type == 'photo' %}
+                  <div class="media-slide photo-slide">
+                    <img
+                      src="{{ media.url }}"
+                      alt="House Photo"
+                      style="width:100%;height:auto;object-fit:cover;border-radius:10px;"
+                    />
+                    {% if media.caption %}
+                    <div class="media-caption">{{ media.caption }}</div>
+                    {% endif %}
+                  </div>
+                {% else %}
+                  <div class="media-slide video-slide">
+                    <video src="{{ media.url }}" controls></video>
+                    {% if media.caption %}
+                    <div class="media-caption">{{ media.caption }}</div>
+                    {% endif %}
+                  </div>
+                {% endif %}
+              {% endfor %}
+              <div class="slider-controls" style="display:none;">
+                <button type="button" class="prev-slide">
+                  <i class="fas fa-chevron-left"></i>
+                </button>
+                <button type="button" class="next-slide">
+                  <i class="fas fa-chevron-right"></i>
+                </button>
+              </div>
+            </div>
+          {% else %}
+            <p class="text-muted" style="font-size:0.9rem;">No house media found.</p>
+          {% endif %}
+
+          <!-- Step 3 button in house media section: icon only -->
+          <div class="section-actions">
+            <a
+              href="{% url 'update_house_step3' house.id %}"
+              class="btn btn-warning btn-sm shadow-sm"
+              title="Step 3 (Add/Update House Media)"
+            >
+              <i class="bi bi-pencil-square"></i> step3
+            </a>
+          </div>
+
+          <!-- Rooms and Their Media (Combined Room + Promotion Medias) -->
+          <h5 class="mt-4 fw-bold text-secondary">
+            <i class="fas fa-door-open me-2 text-primary"></i>Rooms
+          </h5>
+
+          <!-- Step 4 button in room details section: icon only -->
+          <div class="section-actions">
+            <a
+              href="{% url 'update_house_step4' house.id %}"
+              class="btn btn-warning btn-sm shadow-sm"
+              title="Step 4 (Add/Update Rooms)"
+            >
+              <i class="bi bi-pencil-square"></i> step4
+            </a>
+          </div>
+
+          {% if house.rooms.all %}
+            <div class="accordion" id="roomsAccordion{{ house.id }}">
+              {% for room in house.rooms.all %}
+              <div class="accordion-item">
+                <h2
+                  class="accordion-header"
+                  id="headingRoom{{ room.id }}"
+                >
+                  <button
+                    class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseRoom{{ room.id }}"
+                    aria-expanded="false"
+                    aria-controls="collapseRoom{{ room.id }}"
+                  >
+                    <i
+                      class="fas fa-bed me-2"
+                      style="color:#2575fc;"
+                    ></i>
+                    Room {{ room.room_number }}
+                  </button>
+                </h2>
+                <div
+                  id="collapseRoom{{ room.id }}"
+                  class="accordion-collapse collapse"
+                  aria-labelledby="headingRoom{{ room.id }}"
+                  data-bs-parent="#roomsAccordion{{ house.id }}"
+                >
+                  <div class="accordion-body">
+                    <p class="mb-1">
+                      <strong>Description:</strong> {{ room.description }}
+                    </p>
+                    <p class="mb-1">
+                      <strong>Rental Price:</strong> {{ room.rental_price }}
+                    </p>
+                    <p class="mb-1">
+                      <strong>Status:</strong> {{ room.availability_status }}
+                    </p>
+
+                    <h6 class="mt-3 fw-bold text-secondary">
+                      <i class="fas fa-photo-video me-1 text-primary"></i>Room Media
+                    </h6>
+                    {% if room.combined_room_medias %}
+                      <div
+                        class="media-slider room-media-slider"
+                        data-room-id="{{ room.id }}"
+                      >
+                        {% for s in room.combined_room_medias %}
+                          {% if s.type == 'photo' %}
+                            <div class="media-slide photo-slide">
+                              <img
+                                src="{{ s.url }}"
+                                alt="Room Photo"
+                                style="width:100%;height:auto;object-fit:cover;border-radius:10px;"
+                              />
+                              {% if s.caption %}
+                              <div class="media-caption">{{ s.caption }}</div>
+                              {% endif %}
+                            </div>
+                          {% else %}
+                            <div class="media-slide video-slide">
+                              <video src="{{ s.url }}" controls></video>
+                              {% if s.caption %}
+                              <div class="media-caption">{{ s.caption }}</div>
+                              {% endif %}
+                            </div>
+                          {% endif %}
+                        {% endfor %}
+                        <div class="slider-controls" style="display:none;">
+                          <button type="button" class="prev-slide">
+                            <i class="fas fa-chevron-left"></i>
+                          </button>
+                          <button type="button" class="next-slide">
+                            <i class="fas fa-chevron-right"></i>
+                          </button>
+                        </div>
+                      </div>
+                    {% else %}
+                      <p class="text-muted" style="font-size:0.9rem;">
+                        No room media found.
+                      </p>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="no-rooms">No rooms available in this house.</p>
+          {% endif %}
+
+          <!-- Step 5 button in room media section: icon only -->
+          <div class="section-actions mt-3">
+            <a
+              href="{% url 'create_house_step5' house.id %}"
+              class="btn btn-warning btn-sm shadow-sm"
+              title="Step 5 (Add/Update Room Media)"
+            >
+              <i class="bi bi-pencil-square"></i> step5
+            </a>
+          </div>
+
+          <!-- Actions for Step 1 and Step 2: icons only now -->
+          <div class="mt-4 d-flex flex-wrap gap-2">
+            <a
+              href="{% url 'create_house_step1_with_id' house.id %}"
+              class="btn btn-warning btn-sm shadow-sm"
+              title="Step 1"
+            >
+              <i class="bi bi-pencil-square"></i> step1
+            </a>
+            <a
+              href="{% url 'update_house_step2' house.id %}"
+              class="btn btn-warning btn-sm shadow-sm"
+              title="Step 2"
+            >
+              <i class="bi bi-pencil-square"></i> step2
+            </a>
+
+            <a
+              href="{% url 'house_details' house.id %}"
+              class="btn btn-info btn-sm shadow-sm"
+            >
+              <i class="bi bi-eye me-1"></i>
+            </a>
+            <a
+              href="{% url 'delete_house' house.id %}"
+              class="btn btn-danger btn-sm shadow-sm"
+            >
+              <i class="bi bi-trash me-1"></i>
+            </a>
+            <a
+              href="{% url 'delete_rooms' house.id %}"
+              class="btn btn-danger btn-sm shadow-sm"
+            >
+              <i class="bi bi-box-arrow-down me-1"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+      <div
+        class="alert alert-info text-center"
+        style="font-size:1rem; font-weight:600; border-radius:10px;"
+      >
+        <i class="bi bi-exclamation-circle-fill me-2"></i>No houses available
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div
+    class="alert alert-info text-center"
+    style="font-size:1rem; font-weight:600; border-radius:10px;"
+  >
+    <i class="bi bi-exclamation-circle-fill me-2"></i>No houses available
+  </div>
+  {% endif %}
+</div>
+
+<!-- Bootstrap JavaScript Bundle with Popper -->
+<script
+  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-w74Aq9mDz6Dve7DFKsx9b7+z6GTAgC/lssDx8rBDcd1bbPEK5GLQhGdatrChTa1Z"
+  crossorigin="anonymous"
+></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-w74Aq9mDz6Dve7DFKsx9b7+z6GTAgC/lssDx8rBDcd1bbPEK5GLQhGdatrChTa1Z"
+  crossorigin="anonymous">
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // Initialize sliders for all .media-slider elements
+  const sliders = document.querySelectorAll('.media-slider');
+
+  sliders.forEach(slider => {
+    const slides = slider.querySelectorAll('.media-slide');
+    const prevBtn = slider.querySelector('.prev-slide');
+    const nextBtn = slider.querySelector('.next-slide');
+    const controls = slider.querySelector('.slider-controls');
+    let currentIndex = 0;
+
+    function showSlide(index) {
+      slides.forEach((slide, i) => {
+        slide.style.display = (i === index) ? 'block' : 'none';
+      });
+    }
+
+    if (slides.length > 1) {
+      // Show controls only if more than one slide
+      if (controls) {
+        controls.style.display = 'flex';
+      }
+
+      prevBtn.addEventListener('click', () => {
+        currentIndex = (currentIndex === 0) ? slides.length - 1 : currentIndex - 1;
+        showSlide(currentIndex);
+      });
+
+      nextBtn.addEventListener('click', () => {
+        currentIndex = (currentIndex === slides.length - 1) ? 0 : currentIndex + 1;
+        showSlide(currentIndex);
+      });
+    }
+
+    // Show the first slide by default if any
+    if (slides.length > 0) {
+      showSlide(0);
+    }
+  });
+});
+</script>
+{% endblock %}

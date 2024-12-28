@@ -1,0 +1,432 @@
+{% extends 'agent_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid" style="margin-top: 50px; background: #ece5dd; min-height: calc(100vh - 50px);">
+
+    <style>
+        body {
+            background-color: #ece5dd;
+        }
+
+        .chat-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            height: calc(100vh - 120px);
+            display: flex;
+            flex-direction: column;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid #ccc;
+        }
+
+        .chat-header {
+            background: #075e54;
+            color: #fff;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-header img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 10px;
+        }
+
+        .chat-header .name {
+            font-weight: 600;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            background: #ece5dd;
+        }
+
+        .message {
+            max-width: 75%;
+            padding: 8px 12px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            line-height: 1.3;
+            font-size: 14px;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .message.client {
+            background: #ffffff;
+            margin-right: auto;
+        }
+
+        .message.agent {
+            background: #dcf8c6;
+            margin-left: auto;
+        }
+
+        .message img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-bottom: 5px;
+        }
+
+        .message audio {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+
+        .message small {
+            font-size: 10px;
+            color: #777;
+            display: block;
+            text-align: right;
+        }
+
+        .chat-form {
+            background: #f0f0f0;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-form textarea {
+            flex: 1;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 15px;
+            margin-right: 10px;
+            resize: none;
+            outline: none;
+            height: 38px;
+        }
+
+        .chat-form .form-file {
+            display: none;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            margin-right: 10px;
+            color: #555;
+            cursor: pointer;
+        }
+
+        .icon-btn:hover {
+            color: #000;
+        }
+
+        .btn-send {
+            background: #075e54;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        /* Scrollbar */
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f0f0f0;
+        }
+
+        /* Audio recording button */
+        .record-btn {
+            background: #25d366;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            position: relative;
+        }
+        .recording {
+            background: #f44336 !important;
+        }
+
+        .record-timer {
+            position: absolute;
+            bottom: -20px;
+            font-size: 10px;
+            color: #333;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Ticks for agent messages */
+        .checkmark {
+            margin-left: 5px;
+        }
+
+        .checkmark i {
+            vertical-align: middle;
+            font-size: 10px;
+            margin-left: 2px;
+        }
+
+        .checkmark .fa-check,
+        .checkmark .fa-check-double {
+            color: #34B7F1; /* WhatsApp tick color */
+        }
+    </style>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            {% if client.profile_picture %}
+                <img src="{{ client.profile_picture.url }}" alt="{{ client.first_name }}">
+            {% else %}
+                <img src="{% static 'images/default.png' %}" alt="{{ client.first_name }}">
+            {% endif %}
+            <div class="name">{{ client.first_name }} {{ client.surname }}</div>
+        </div>
+
+        <div class="chat-messages" id="chat-messages">
+            {% for msg in messages %}
+            <div class="message {{ msg.type }}">
+                {% if msg.text %}
+                    <p>{{ msg.text|linebreaks }}</p>
+                {% endif %}
+                {% if msg.image %}
+                    <img src="{{ msg.image }}" alt="Image">
+                {% endif %}
+                {% if msg.audio %}
+                    <audio controls>
+                        <source src="{{ msg.audio }}" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                {% endif %}
+                <small>
+                    {{ msg.created_at|date:"M d, H:i" }}
+                    {% if msg.type == 'agent' %}
+                        {% if msg.is_read %}
+                            <!-- Two green ticks -->
+                            <span class="checkmark"><i class="fas fa-check-double"></i></span>
+                        {% else %}
+                            <!-- One green tick -->
+                            <span class="checkmark"><i class="fas fa-check"></i></span>
+                        {% endif %}
+                    {% endif %}
+                </small>
+            </div>
+            {% empty %}
+            <p class="text-center text-muted">No messages yet. Start chatting!</p>
+            {% endfor %}
+        </div>
+
+        <form class="chat-form" id="chat-form" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.reply_text }}
+            <!-- Image upload icon -->
+            <button type="button" class="icon-btn" id="image-icon-btn" title="Attach Image">
+                <i class="fas fa-image"></i>
+            </button>
+            <input type="file" name="image" id="image-file-input" class="form-file" accept="image/*">
+
+            <!-- Audio recording button -->
+            <button type="button" class="record-btn" id="record-audio-btn" title="Record Audio">
+                <i class="fas fa-microphone"></i>
+                <span class="record-timer" id="record-timer" style="display:none;">0s</span>
+            </button>
+            <input type="file" name="audio" id="audio-file-input" class="d-none" accept="audio/*">
+
+            <button type="submit" class="btn-send"><i class="fas fa-paper-plane"></i></button>
+        </form>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    var chatMessages = $('#chat-messages');
+    chatMessages.scrollTop(chatMessages[0].scrollHeight);
+
+    const csrftoken = getCookie('csrftoken');
+
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+
+    // Trigger image file input
+    $('#image-icon-btn').click(function() {
+        $('#image-file-input').click();
+    });
+
+    // AJAX form submission for agent reply
+    $('#chat-form').submit(function(e) {
+        e.preventDefault();
+        let formData = new FormData(this);
+
+        $.ajax({
+            url: "",
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(data) {
+                if (data.success) {
+                    appendMessage(data, 'agent');
+                } else {
+                    alert('Error: ' + (data.error || 'Unknown error'));
+                }
+            },
+            error: function(xhr) {
+                alert('An error occurred while sending the reply.');
+            }
+        });
+    });
+
+    function appendMessage(data, msgType) {
+        let messageHtml = '';
+        if (data.text) {
+            messageHtml += `<p>${data.text}</p>`;
+        }
+        if (data.image_url) {
+            messageHtml += `<img src="${data.image_url}" alt="Image">`;
+        }
+        if (data.audio_url) {
+            messageHtml += `<audio controls><source src="${data.audio_url}" type="audio/mpeg"></audio>`;
+        }
+
+        // Agent message just sent: client hasn't read yet, so one tick
+        let ticks = '';
+        if (msgType === 'agent') {
+            if (data.is_read) {
+                ticks = `<span class="checkmark"><i class="fas fa-check-double"></i></span>`;
+            } else {
+                ticks = `<span class="checkmark"><i class="fas fa-check"></i></span>`;
+            }
+        }
+
+        messageHtml += `<small>${data.created_at}${ticks}</small>`;
+        const newMessage = `<div class="message ${msgType}">${messageHtml}</div>`;
+        $('#chat-messages').append(newMessage);
+        chatMessages.scrollTop(chatMessages[0].scrollHeight);
+        $('#chat-form')[0].reset();
+        $('#audio-file-input').val('');
+    }
+
+    // WebSocket logic
+    const roomName = "{{ room_name }}";
+    const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+    const chatSocket = new WebSocket(`${wsScheme}://${window.location.host}/ws/chat/${roomName}/`);
+
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        if (data.message) {
+            appendIncomingMessage(data.message);
+        }
+    };
+
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+
+    function appendIncomingMessage(message) {
+        // If message.type is 'client', from agent's perspective it's 'client' (received)
+        // If message.type is 'agent', from agent's perspective, it's their own message (no need to add?), or you could still add if needed
+        let msgType = message.type;
+        appendMessage(message, msgType);
+    }
+
+    // Audio Recording Logic
+    let mediaRecorder;
+    let chunks = [];
+    let recording = false;
+    let recordBtn = $('#record-audio-btn');
+    let recordTimer = $('#record-timer');
+    let recordStartTime;
+
+    function updateRecordTimer() {
+        if (!recording) return;
+        let elapsed = Math.floor((Date.now() - recordStartTime) / 1000);
+        recordTimer.text(elapsed + 's');
+        setTimeout(updateRecordTimer, 1000);
+    }
+
+    recordBtn.click(async function() {
+        if (!recording) {
+            // Start recording
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                try {
+                    let stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.start();
+                    recording = true;
+                    recordBtn.addClass('recording');
+                    chunks = [];
+                    recordStartTime = Date.now();
+                    recordTimer.show();
+                    updateRecordTimer();
+
+                    mediaRecorder.ondataavailable = function(e) {
+                        chunks.push(e.data);
+                    }
+
+                    mediaRecorder.onstop = function(e) {
+                        let blob = new Blob(chunks, { 'type': 'audio/mpeg' });
+                        let file = new File([blob], 'recorded_audio.mp3', {type: 'audio/mpeg'});
+                        let dt = new DataTransfer();
+                        dt.items.add(file);
+                        $('#audio-file-input')[0].files = dt.files;
+                    }
+
+                } catch (err) {
+                    alert('Microphone access denied or not available.');
+                }
+            } else {
+                alert('Audio recording not supported in this browser.');
+            }
+        } else {
+            // Stop recording
+            mediaRecorder.stop();
+            recording = false;
+            recordBtn.removeClass('recording');
+            recordTimer.hide();
+        }
+    });
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i=0; i < cookies.length; i++){
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length+1) === (name+'=')){
+                    cookieValue = decodeURIComponent(cookie.substring(name.length+1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+</script>
+{% endblock %}

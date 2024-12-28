@@ -1,0 +1,646 @@
+{% extends 'owner_base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block extra_head %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<style>
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background: linear-gradient(135deg, #d9faff, #ffffff);
+        min-height: 100vh;
+        color: #333;
+        margin: 0;
+        padding: 0;
+    }
+
+    .iphone-card {
+        border:0;
+        border-radius:20px;
+        background: linear-gradient(135deg, #ffffff, #f3f8ff);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        margin-top: 2rem;
+    }
+
+    .iphone-card-header {
+        border-radius:20px 20px 0 0;
+        background: linear-gradient(135deg, #6a11cb, #2575fc);
+        padding: 2rem;
+    }
+
+    .iphone-card-header h2 {
+        font-weight:700;
+        color:#fff;
+        margin:0;
+        text-shadow:1px 1px 3px rgba(0,0,0,0.3);
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    .form-label {
+        font-weight:600;
+        color:#444;
+        display:flex;
+        align-items:center;
+        margin-bottom:0.5rem;
+    }
+
+    .form-label i {
+        color:#2575fc;
+        margin-right:0.5rem;
+    }
+
+    .form-check-input {
+        margin-right:5px;
+    }
+
+    .form-control, .form-select {
+        border-radius:10px;
+        border:1px solid #ccc;
+        background:#fdfdfd;
+        transition: box-shadow 0.2s ease-in-out, background 0.2s ease-in-out;
+    }
+
+    .form-control:focus, .form-select:focus {
+        box-shadow:0 0 0 3px rgba(37,117,252,0.25);
+        border-color:#2575fc;
+        outline:none;
+        background:#ffffff;
+    }
+
+    .needs-validation button[type="submit"] {
+        border-radius:10px;
+        font-weight:600;
+        background: linear-gradient(135deg, #6a11cb, #2575fc);
+        border:none;
+        color:#fff;
+        transition: background 0.2s ease-in-out, transform 0.1s ease-in-out;
+    }
+
+    .needs-validation button[type="submit"]:hover {
+        background: linear-gradient(135deg, #5c0eb5, #1e64d4);
+        transform: translateY(-1px);
+    }
+
+    .needs-validation button[type="submit"]:active {
+        background: linear-gradient(135deg, #4e0c9d, #1b5bbb);
+        transform: translateY(1px);
+    }
+
+    .accordion-button {
+        border:none;
+        border-radius:10px;
+        background:#f3f8ff;
+        font-weight:600;
+    }
+
+    .accordion-button.collapsed {
+        background:#ffffff;
+        box-shadow:none;
+    }
+
+    .accordion-item {
+        border:none;
+        border-radius:10px;
+        overflow:hidden;
+    }
+
+    .accordion-item:not(:last-child) {
+        margin-bottom:1rem;
+    }
+
+    .room-media-container .room-media-item {
+        background:#ffffff;
+        border-radius:10px;
+        box-shadow:0 2px 8px rgba(0,0,0,0.1);
+        padding:1rem;
+    }
+
+    .room-media-container .room-media-item:not(:last-child) {
+        margin-bottom:1rem;
+    }
+
+    .form-control:hover, .form-select:hover {
+        background:#f9f9ff;
+    }
+
+    .btn-outline-secondary, .add-media-btn {
+        border-radius:10px;
+        font-weight:600;
+    }
+
+    .btn-outline-secondary:hover, .add-media-btn:hover {
+        background:#e0e0e0;
+    }
+
+    .d-flex.gap-2.mb-3 > button {
+        border-radius:10px;
+        font-weight:600;
+    }
+
+    .camera-container,
+    .video-container {
+        display:none;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 1rem;
+        gap:1rem;
+    }
+
+    .camera-video,
+    .record-video-preview {
+        width:100%;
+        max-height:500px;
+        object-fit:cover;
+        border-radius:10px;
+        box-shadow:0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .no-camera-msg {
+        display:none;
+        color:red;
+        font-weight:600;
+        margin-top:1rem;
+    }
+
+    .media-preview img,
+    .media-preview video {
+        max-width:150px;
+        max-height:150px;
+        border-radius:10px;
+        box-shadow:0 4px 12px rgba(0,0,0,0.1);
+        margin-top:1rem;
+    }
+
+    .action-buttons {
+        display:flex;
+        gap:0.5rem;
+    }
+
+    .timer {
+        font-weight:600;
+        color:#d9534f;
+        font-size:1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card iphone-card">
+        <div class="card-header iphone-card-header text-white text-center fw-bold">
+            <h2><i class="fas fa-photo-video me-2"></i>Step 5: Add Media for Each Room</h2>
+        </div>
+        <div class="card-body">
+            <p style="font-size:0.95rem;">You have {{ rooms.count }} room(s). For each room, choose whether to upload a photo or video, and then select or capture the corresponding file. You can switch cameras, record audio on videos, and add multiple media items per room.</p>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="accordion" id="roomsAccordion">
+                    {% for room in rooms %}
+                    <div class="accordion-item mb-3">
+                        <h2 class="accordion-header" id="heading{{ room.id }}">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ room.id }}" aria-expanded="false" aria-controls="collapse{{ room.id }}">
+                                <i class="fas fa-door-open me-2" style="color:#2575fc;"></i>Room {{ room.room_number }}
+                            </button>
+                        </h2>
+                        <div id="collapse{{ room.id }}" class="accordion-collapse collapse" aria-labelledby="heading{{ room.id }}" data-bs-parent="#roomsAccordion">
+                            <div class="accordion-body">
+                                <p class="text-muted" style="font-size:0.9rem;">Add media for this room:</p>
+
+                                <div class="room-media-container" data-room-id="{{ room.id }}">
+                                    <div class="room-media-item mb-4" data-index="0">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold text-primary">
+                                                <i class="fas fa-icons"></i>Media Type
+                                            </label>
+                                            <div>
+                                                <label class="form-check-label me-3">
+                                                    <input type="radio" name="media_type_{{ room.id }}_0" value="photo" class="form-check-input media-type-radio" checked> Photo
+                                                </label>
+                                                <label class="form-check-label">
+                                                    <input type="radio" name="media_type_{{ room.id }}_0" value="video" class="form-check-input media-type-radio"> Video
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold text-primary">
+                                                <i class="fas fa-file-upload"></i> Select File
+                                            </label>
+                                            <input type="file" name="media_file_{{ room.id }}_0" class="form-control media-file-input" required>
+                                        </div>
+                                        <div class="d-flex gap-2 mb-3 action-buttons">
+                                            <button type="button" class="btn btn-outline-primary take-picture-btn" style="display:none;">
+                                                <i class="fas fa-camera"></i> Take Picture
+                                            </button>
+                                            <button type="button" class="btn btn-outline-primary record-video-btn" style="display:none;">
+                                                <i class="fas fa-video"></i> Record Video
+                                            </button>
+                                        </div>
+                                        <div class="no-camera-msg">No camera found</div>
+                                        <div class="camera-container">
+                                            <video class="camera-video" autoplay playsinline muted></video>
+                                            <div class="action-buttons">
+                                                <button type="button" class="btn btn-secondary switch-camera-btn" title="Switch Camera">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-success capture-photo-btn">
+                                                    <i class="fas fa-check-circle"></i> Capture
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="video-container">
+                                            <video class="record-video-preview" autoplay playsinline muted></video>
+                                            <div class="timer">00:00</div>
+                                            <div class="action-buttons">
+                                                <button type="button" class="btn btn-secondary switch-camera-btn" title="Switch Camera">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-success start-record-btn">Start</button>
+                                                <button type="button" class="btn btn-danger stop-record-btn" style="display:none;">Stop</button>
+                                            </div>
+                                        </div>
+                                        <div class="media-preview"></div>
+                                    </div>
+                                </div>
+
+                                <button type="button" class="btn btn-outline-secondary add-media-btn" data-room-id="{{ room.id }}">
+                                    <i class="fas fa-plus-circle"></i> Add Another Media
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="alert alert-info text-center" style="border-radius:10px;">No rooms found.</div>
+                    {% endfor %}
+                </div>
+
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg shadow">
+                        <i class="fas fa-check-circle me-2"></i> Save Media and Continue
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Audio for camera sound -->
+<audio id="camera-sound" src="{% static 'audio/camera.mp3' %}" preload="auto"></audio>
+
+<!-- ... The template structure (HTML) remains the same as previously provided ... -->
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const cameraSound = document.getElementById('camera-sound');
+
+    function initMediaItem(mediaItem) {
+        const mediaTypeRadios = mediaItem.querySelectorAll('.media-type-radio');
+        const takePictureBtn = mediaItem.querySelector('.take-picture-btn');
+        const recordVideoBtn = mediaItem.querySelector('.record-video-btn');
+        const noCameraMsg = mediaItem.querySelector('.no-camera-msg');
+        const cameraContainer = mediaItem.querySelector('.camera-container');
+        const cameraVideo = mediaItem.querySelector('.camera-video');
+        const capturePhotoBtn = mediaItem.querySelector('.capture-photo-btn');
+        const videoContainer = mediaItem.querySelector('.video-container');
+        const recordVideoPreview = mediaItem.querySelector('.record-video-preview');
+        const startRecordBtn = mediaItem.querySelector('.start-record-btn');
+        const stopRecordBtn = mediaItem.querySelector('.stop-record-btn');
+        const switchCameraBtns = mediaItem.querySelectorAll('.switch-camera-btn');
+        const mediaPreview = mediaItem.querySelector('.media-preview');
+        const fileInput = mediaItem.querySelector('.media-file-input');
+        const timerElement = videoContainer.querySelector('.timer') || document.createElement('div');
+
+        let mediaStream = null;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let currentFacingMode = "user";
+        let recordInterval = null;
+        let recordSeconds = 0;
+        let isRecording = false; // Track if currently recording a video
+
+        function showNoCamera() {
+            noCameraMsg.style.display = "block";
+            cameraContainer.style.display = "none";
+            videoContainer.style.display = "none";
+        }
+
+        function resetCamera() {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                mediaStream = null;
+            }
+            cameraContainer.style.display = "none";
+            videoContainer.style.display = "none";
+            noCameraMsg.style.display = "none";
+            stopRecordingTimer();
+            isRecording = false;
+        }
+
+        function updatePreview() {
+            mediaPreview.innerHTML = "";
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const selectedType = mediaItem.querySelector('input.media-type-radio:checked').value;
+            const url = URL.createObjectURL(file);
+
+            if (selectedType === 'photo') {
+                const img = document.createElement('img');
+                img.src = url;
+                mediaPreview.appendChild(img);
+            } else if (selectedType === 'video') {
+                const vid = document.createElement('video');
+                vid.src = url;
+                vid.controls = true;
+                mediaPreview.appendChild(vid);
+            }
+        }
+
+        function stopRecordingTimer() {
+            if (recordInterval) {
+                clearInterval(recordInterval);
+                recordInterval = null;
+                recordSeconds = 0;
+                timerElement.textContent = "00:00";
+            }
+        }
+
+        function startRecordingTimer() {
+            stopRecordingTimer();
+            recordSeconds = 0;
+            recordInterval = setInterval(() => {
+                recordSeconds++;
+                const mins = String(Math.floor(recordSeconds / 60)).padStart(2, '0');
+                const secs = String(recordSeconds % 60).padStart(2, '0');
+                timerElement.textContent = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        async function startCameraForPhoto() {
+            try {
+                resetCamera();
+                mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacingMode } });
+                cameraContainer.style.display = "flex";
+                cameraVideo.srcObject = mediaStream;
+            } catch (err) {
+                showNoCamera();
+            }
+        }
+
+        async function startCameraForVideo() {
+            try {
+                resetCamera();
+                // Enable audio for video recording
+                mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacingMode }, audio: true });
+                videoContainer.style.display = "flex";
+                recordVideoPreview.srcObject = mediaStream;
+            } catch (err) {
+                showNoCamera();
+            }
+        }
+
+        function stopRecordingAndFinalize() {
+            // Stop recording if in progress
+            if (isRecording && mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+            }
+        }
+
+        // Handle media type changes
+        mediaTypeRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                const type = radio.value;
+                if (type === 'photo') {
+                    takePictureBtn.style.display = "inline-block";
+                    recordVideoBtn.style.display = "none";
+                } else {
+                    takePictureBtn.style.display = "none";
+                    recordVideoBtn.style.display = "inline-block";
+                }
+                resetCamera();
+                updatePreview();
+            });
+        });
+
+        fileInput.addEventListener('change', updatePreview);
+
+        // Initialize default (Photo)
+        if (mediaItem.querySelector('input.media-type-radio:checked').value === 'photo') {
+            takePictureBtn.style.display = "inline-block";
+        } else {
+            recordVideoBtn.style.display = "inline-block";
+        }
+
+        // Photo capturing
+        takePictureBtn.addEventListener('click', startCameraForPhoto);
+
+        capturePhotoBtn.addEventListener('click', function() {
+            if (!mediaStream) return;
+            cameraSound.currentTime = 0;
+            cameraSound.play().catch(err => console.error("Audio play error:", err));
+
+            const track = mediaStream.getTracks()[0];
+            if (!track) return;
+
+            const canvas = document.createElement("canvas");
+            canvas.width = cameraVideo.videoWidth;
+            canvas.height = cameraVideo.videoHeight;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(cameraVideo, 0, 0, canvas.width, canvas.height);
+
+            canvas.toBlob((blob) => {
+                const file = new File([blob], "photo.png", { type: "image/png" });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                fileInput.files = dataTransfer.files;
+
+                updatePreview();
+
+                track.stop();
+                mediaStream = null;
+                cameraContainer.style.display = "none";
+            }, "image/png");
+        });
+
+        // Video recording
+        recordVideoBtn.addEventListener('click', startCameraForVideo);
+
+        startRecordBtn.addEventListener('click', function() {
+            if (!mediaStream) return;
+            recordedChunks = [];
+            mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm' });
+            isRecording = true;
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) {
+                    recordedChunks.push(e.data);
+                }
+            };
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                const file = new File([blob], "video.webm", { type: "video/webm" });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                fileInput.files = dataTransfer.files;
+
+                updatePreview();
+
+                if (mediaStream) {
+                    mediaStream.getTracks().forEach(track => track.stop());
+                    mediaStream = null;
+                }
+                videoContainer.style.display = "none";
+                stopRecordingTimer();
+                isRecording = false;
+            };
+
+            mediaRecorder.start();
+            startRecordBtn.style.display = "none";
+            stopRecordBtn.style.display = "inline-block";
+            startRecordingTimer();
+        });
+
+        stopRecordBtn.addEventListener('click', function() {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                isRecording = false;
+            }
+            stopRecordBtn.style.display = "none";
+            startRecordBtn.style.display = "inline-block";
+        });
+
+        switchCameraBtns.forEach(btn => {
+            btn.addEventListener('click', async function() {
+                // If currently recording, stop recording before switching camera
+                if (isRecording && mediaRecorder && mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                    isRecording = false;
+                    // Wait until onstop finalizes the file
+                    // After stopping, we can switch cameras
+                    mediaRecorder.onstop = () => {
+                        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                        const file = new File([blob], "video.webm", { type: "video/webm" });
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+                        fileInput.files = dataTransfer.files;
+
+                        updatePreview();
+
+                        if (mediaStream) {
+                            mediaStream.getTracks().forEach(track => track.stop());
+                            mediaStream = null;
+                        }
+                        videoContainer.style.display = "none";
+                        stopRecordingTimer();
+                        // Now switch camera after recording stopped
+                        currentFacingMode = (currentFacingMode === "user") ? "environment" : "user";
+                        const type = mediaItem.querySelector('input.media-type-radio:checked').value;
+                        if (type === 'photo') {
+                            startCameraForPhoto();
+                        } else {
+                            startCameraForVideo();
+                        }
+                    };
+                } else {
+                    // No recording in progress, safe to switch camera directly
+                    currentFacingMode = (currentFacingMode === "user") ? "environment" : "user";
+                    const type = mediaItem.querySelector('input.media-type-radio:checked').value;
+                    if (type === 'photo') {
+                        startCameraForPhoto();
+                    } else {
+                        startCameraForVideo();
+                    }
+                }
+            });
+        });
+    }
+
+    // Initialize the existing media items on page load
+    document.querySelectorAll('.room-media-item').forEach(item => {
+        initMediaItem(item);
+    });
+
+    const addMediaButtons = document.querySelectorAll(".add-media-btn");
+    addMediaButtons.forEach(button => {
+        button.addEventListener("click", function() {
+            const roomId = this.getAttribute("data-room-id");
+            const container = document.querySelector(`.room-media-container[data-room-id="${roomId}"]`);
+            let currentIndex = 0;
+
+            container.querySelectorAll(".room-media-item").forEach(item => {
+                const idx = parseInt(item.getAttribute("data-index"), 10);
+                if (idx >= currentIndex) {
+                    currentIndex = idx + 1;
+                }
+            });
+
+            const newItem = document.createElement("div");
+            newItem.classList.add("room-media-item", "mb-4");
+            newItem.setAttribute("data-index", currentIndex);
+
+            newItem.innerHTML = `
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-primary">
+                        <i class="fas fa-icons"></i>Media Type
+                    </label>
+                    <div>
+                        <label class="form-check-label me-3">
+                            <input type="radio" name="media_type_${roomId}_${currentIndex}" value="photo" class="form-check-input media-type-radio" checked> Photo
+                        </label>
+                        <label class="form-check-label">
+                            <input type="radio" name="media_type_${roomId}_${currentIndex}" value="video" class="form-check-input media-type-radio"> Video
+                        </label>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-primary">
+                        <i class="fas fa-file-upload"></i> Select File
+                    </label>
+                    <input type="file" name="media_file_${roomId}_${currentIndex}" class="form-control media-file-input" required>
+                </div>
+                <div class="d-flex gap-2 mb-3 action-buttons">
+                    <button type="button" class="btn btn-outline-primary take-picture-btn" style="display:none;">
+                        <i class="fas fa-camera"></i> Take Picture
+                    </button>
+                    <button type="button" class="btn btn-outline-primary record-video-btn" style="display:none;">
+                        <i class="fas fa-video"></i> Record Video
+                    </button>
+                </div>
+                <div class="no-camera-msg">No camera found</div>
+                <div class="camera-container">
+                    <video class="camera-video" autoplay playsinline muted></video>
+                    <div class="action-buttons">
+                        <button type="button" class="btn btn-secondary switch-camera-btn" title="Switch Camera">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                        <button type="button" class="btn btn-success capture-photo-btn">
+                            <i class="fas fa-check-circle"></i> Capture
+                        </button>
+                    </div>
+                </div>
+                <div class="video-container">
+                    <video class="record-video-preview" autoplay playsinline muted></video>
+                    <div class="timer">00:00</div>
+                    <div class="action-buttons">
+                        <button type="button" class="btn btn-secondary switch-camera-btn" title="Switch Camera">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                        <button type="button" class="btn btn-success start-record-btn">Start</button>
+                        <button type="button" class="btn btn-danger stop-record-btn" style="display:none;">Stop</button>
+                    </div>
+                </div>
+                <div class="media-preview"></div>
+            `;
+
+            container.appendChild(newItem);
+            initMediaItem(newItem);
+        });
+    });
+});
+</script>
+{% endblock %}

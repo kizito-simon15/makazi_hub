@@ -1,0 +1,293 @@
+{% extends 'owner_base.html' %}
+
+{% block content %}
+<!-- iPhone-like inspired styling and icons -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-jxW/HpAGKnP1y6qy5k0dwUyV7T8vDv8FTmZf17BU5dLwYevwq9Q12RM7DAj1i9AS7fd7CAK4Brt7h4VzH0GlwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<style>
+  body {
+    background: linear-gradient(to bottom, #fafafa, #e9ecef);
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    margin: 0; padding: 0;
+    color: #333;
+  }
+
+  .container {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 15px;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    overflow: hidden;
+  }
+
+  .header {
+    text-align: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+  }
+
+  .header h1 {
+    font-size: 1.4em;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .header h1 .icon {
+    color: #007aff;
+  }
+
+  #map {
+    width: 100%;
+    height: 350px;
+    border-radius: 15px;
+    margin: 20px 0;
+    border: 1px solid #ddd;
+    overflow: hidden;
+    position: relative;
+  }
+
+  #imagery {
+    margin-top: 20px;
+    background: #f8f8f8;
+    border-radius: 15px;
+    padding: 15px;
+  }
+
+  #imagery h2 {
+    font-size: 1em;
+    margin: 0 0 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 500;
+    color: #555;
+  }
+
+  #imagery-content ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  #imagery-content li {
+    margin: 5px 0;
+    display: flex;
+    align-items: center;
+  }
+
+  #imagery-content img {
+    border-radius: 8px;
+    margin-right: 10px;
+  }
+
+  form {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  form div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  form label {
+    font-size: 0.9em;
+    color: #555;
+    flex: 0 0 100px;
+  }
+
+  form input[type="text"] {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 1em;
+    background: #fafafa;
+    color: #333;
+  }
+
+  button[type="submit"] {
+    background: #007aff;
+    color: #fff;
+    padding: 10px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1em;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s;
+    width: 100%;
+    text-align: center;
+    margin-top: 10px;
+  }
+
+  button[type="submit"]:hover {
+    background: #005bb5;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 600px) {
+    .container {
+      border-radius: 0;
+      margin: 0;
+      box-shadow: none;
+    }
+
+    form div {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    form label {
+      margin-bottom: 5px;
+      flex: unset;
+    }
+  }
+</style>
+
+<div class="container">
+  <div class="header">
+    <h1><i class="fas fa-map-marker-alt icon"></i>
+      {% if house.location %}
+        Update Location for {{ house }}
+      {% else %}
+        Set Location for {{ house }}
+      {% endif %}
+    </h1>
+  </div>
+
+  <div id="map"></div>
+
+  <div id="imagery">
+    <h2><i class="fas fa-camera icon" style="color:#333;"></i> Street Level Imagery</h2>
+    <div id="imagery-content">
+      {% if house.location %}
+        Click on the map to update location and view images.
+      {% else %}
+        Tap on the map to set location and view images.
+      {% endif %}
+    </div>
+  </div>
+
+  <form method="post">
+      {% csrf_token %}
+      <div>
+          <label for="id_latitude"><i class="fas fa-location-arrow"></i> Latitude:</label>
+          {{ form.latitude }}
+      </div>
+      <div>
+          <label for="id_longitude"><i class="fas fa-location-arrow"></i> Longitude:</label>
+          {{ form.longitude }}
+      </div>
+      <button type="submit">
+        {% if house.location %}
+          Update Location
+        {% else %}
+          Save Location
+        {% endif %}
+      </button>
+  </form>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+// Check if we have an existing location
+var existingLat = {% if house.location and house.location.latitude %}{{ house.location.latitude }}{% else %}null{% endif %};
+var existingLng = {% if house.location and house.location.longitude %}{{ house.location.longitude }}{% else %}null{% endif %};
+
+var mapCenter = [0, 0];
+var zoomLevel = 2;
+
+if (existingLat && existingLng) {
+  // Use existing location as map center
+  mapCenter = [parseFloat(existingLat), parseFloat(existingLng)];
+  zoomLevel = 15;
+}
+
+var map = L.map('map').setView(mapCenter, zoomLevel);
+
+// Add OSM tiles
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '© OpenStreetMap contributors'
+}).addTo(map);
+
+// Custom marker icon
+var customIcon = L.icon({
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/854/854878.png', // a location pin icon
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    popupAnchor: [0, -30]
+});
+
+var marker = null;
+
+// If we already have a location, place a marker
+if (existingLat && existingLng) {
+  marker = L.marker([existingLat, existingLng], { icon: customIcon }).addTo(map);
+}
+
+// Your Mapillary access token (if needed)
+const MAPILLARY_ACCESS_TOKEN = 'MLY|8804320376341563|c6addb0bc42497b62475ebc1f6ef28b2';
+
+map.on('click', async (e) => {
+  let lat = e.latlng.lat;
+  let lng = e.latlng.lng;
+
+  // Format coordinates to 6 decimal places
+  lat = lat.toFixed(6);
+  lng = lng.toFixed(6);
+
+  // Update form fields
+  document.getElementById('id_latitude').value = lat;
+  document.getElementById('id_longitude').value = lng;
+
+  // Move or create marker
+  if (marker) {
+    marker.setLatLng([lat, lng]);
+  } else {
+    marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
+  }
+
+  // Load images from Mapillary
+  const imageryContent = document.getElementById('imagery-content');
+  imageryContent.innerHTML = 'Loading images...';
+  const url = `https://graph.mapillary.com/images?access_token=${MAPILLARY_ACCESS_TOKEN}&fields=id,thumb_320_url,geometry,computed_geometry&limit=5&closeto=${lng},${lat}`;
+
+  try {
+    const response = await axios.get(url);
+    const data = response.data.data;
+
+    if (data && data.length > 0) {
+      let content = '<ul>';
+      data.forEach(image => {
+        if (image.thumb_320_url) {
+          content += `<li>
+            <img src="${image.thumb_320_url}" alt="Mapillary image thumbnail" width="80" height="60"/>
+            <a href="https://www.mapillary.com/app/?pKey=${image.id}" target="_blank">View on Mapillary</a>
+          </li>`;
+        }
+      });
+      content += '</ul>';
+      imageryContent.innerHTML = content;
+    } else {
+      imageryContent.innerHTML = 'No images found at this location.';
+    }
+
+  } catch (error) {
+    console.error(error);
+    imageryContent.innerHTML = 'Error loading images. Check console for details.';
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,23 @@
+{
+    "short_name": "Makazi",
+    "name": "MakaziHub",
+    "description": "MakaziHub Progressive Web App",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "theme_color": "#000000",
+    "background_color": "#ffffff",
+    "icons": [
+      {
+        "src": "/static/images/makaziapp.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      },
+      {
+        "src": "/static/images/makaziapp.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ]
+  }
+  

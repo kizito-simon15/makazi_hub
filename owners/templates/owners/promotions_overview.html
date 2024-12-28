@@ -1,0 +1,252 @@
+{% extends 'agent_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid px-0" style="margin-top: 50px; min-height: calc(100vh - 50px); background: linear-gradient(135deg, #00b09b, #96c93d);">
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #ece5dd; /* This is overridden by the container's gradient */
+        }
+
+        .overview-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid #ccc;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .overview-header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .overview-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #075e54;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .overview-header h2 i {
+            margin-right: 10px;
+            font-size: 26px;
+        }
+
+        .overview-header p {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 0;
+        }
+
+        .add-promotions-btn {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #075e54;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 20px;
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+
+        .add-promotions-btn i {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        .add-promotions-btn:hover {
+            background: #064e44;
+            text-decoration: none;
+            color: #fff;
+        }
+
+        .house-block {
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .house-block h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            color: #075e54;
+        }
+
+        .house-block h3 i {
+            margin-right: 12px;
+            font-size: 22px;
+        }
+
+        .promotion-block {
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .promotion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .promotion-header .target {
+            font-weight: 700;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .promotion-header .date {
+            font-size: 13px;
+            color: #999;
+        }
+
+        .promotion-description {
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        .media-gallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .media-item {
+            background: #f9f9f9;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #ccc;
+            flex: 0 0 calc(50% - 15px);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            transition: box-shadow 0.3s;
+        }
+
+        .media-item:hover {
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .media-item img,
+        .media-item video {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .media-caption {
+            font-size: 13px;
+            color: #333;
+            padding: 10px;
+        }
+
+        video {
+            outline: none;
+        }
+
+        .text-muted {
+            font-size: 14px !important;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .overview-container {
+                margin: 20px;
+            }
+
+            .media-item {
+                flex: 0 0 100%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .house-block h3 {
+                font-size: 18px;
+            }
+        }
+    </style>
+
+    <div class="overview-container">
+        <div class="overview-header">
+            <h2><i class="fas fa-bullhorn"></i> Promotions Overview</h2>
+            <a href="{% url 'promotion_step1' %}" class="add-promotions-btn">
+                <i class="fas fa-plus-circle"></i>Add promotions pictures
+            </a>
+            <p>Here are the promotions for the houses and rooms you manage.</p>
+        </div>
+
+        {% if houses_with_promotions %}
+            {% for entry in houses_with_promotions %}
+            <div class="house-block">
+                <h3><i class="fas fa-home"></i>{{ entry.house.house_name }}</h3>
+                {% for p in entry.promotions %}
+                <div class="promotion-block">
+                    <div class="promotion-header">
+                        <div class="target">{{ p.target }}</div>
+                        <div class="date">{{ p.promotion.created_at|date:"M d, Y H:i" }}</div>
+                    </div>
+                    <div class="promotion-description">
+                        {{ p.promotion.description|linebreaks }}
+                    </div>
+                    {% if p.media %}
+                    <div class="media-gallery">
+                        {% for m in p.media %}
+                        <div class="media-item">
+                            {% if m.media_type == 'image' %}
+                                <img src="{{ m.file.url }}" alt="Promotion Media">
+                            {% elif m.media_type == 'video' %}
+                                <video controls>
+                                    <source src="{{ m.file.url }}" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                            {% endif %}
+                            {% if m.caption %}
+                            <div class="media-caption">{{ m.caption }}</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                        <p class="text-muted">No media uploaded for this promotion.</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-center text-muted">No promotions found.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

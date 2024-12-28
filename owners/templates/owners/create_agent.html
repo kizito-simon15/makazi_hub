@@ -1,0 +1,410 @@
+<!-- owners/templates/owners/create_agent.html -->
+{% extends 'owner_base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white text-center">
+            <h2>
+                {% if agent %}
+                    <i class="fas fa-user-edit me-2"></i>Edit Agent
+                {% else %}
+                    <i class="fas fa-user-plus me-2"></i>Create Agent
+                {% endif %}
+            </h2>
+        </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <!-- Username -->
+                <div class="mb-3">
+                    <label for="{{ form.username.id_for_label }}" class="form-label">
+                        <i class="fas fa-user me-2 text-primary"></i>{{ form.username.label }}
+                    </label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.username.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Password -->
+                <div class="mb-3">
+                    <label for="{{ form.password1.id_for_label }}" class="form-label">
+                        <i class="fas fa-lock me-2 text-warning"></i>{{ form.password1.label }}
+                    </label>
+                    <div class="input-group">
+                        {{ form.password1 }}
+                        <button type="button" class="btn btn-outline-secondary toggle-password" data-toggle="#id_password1" aria-label="Toggle password visibility">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        {% if form.password1.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.password1.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="mb-3">
+                    <label for="{{ form.password2.id_for_label }}" class="form-label">
+                        <i class="fas fa-lock me-2 text-warning"></i>{{ form.password2.label }}
+                    </label>
+                    <div class="input-group">
+                        {{ form.password2 }}
+                        <button type="button" class="btn btn-outline-secondary toggle-password" data-toggle="#id_password2" aria-label="Toggle password visibility">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        {% if form.password2.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.password2.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- First Name -->
+                <div class="mb-3">
+                    <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                        <i class="fas fa-user me-2 text-primary"></i>{{ form.first_name.label }}
+                    </label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.first_name.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Last Name -->
+                <div class="mb-3">
+                    <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                        <i class="fas fa-user-tag me-2 text-success"></i>{{ form.last_name.label }}
+                    </label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.last_name.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Email -->
+                <div class="mb-3">
+                    <label for="{{ form.email.id_for_label }}" class="form-label">
+                        <i class="fas fa-envelope me-2 text-info"></i>{{ form.email.label }}
+                    </label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.email.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Phone Number -->
+                <div class="mb-3">
+                    <label for="{{ form.phone_number.id_for_label }}" class="form-label">
+                        <i class="fas fa-phone-alt me-2 text-danger"></i>{{ form.phone_number.label }}
+                    </label>
+                    {{ form.phone_number }}
+                    {% if form.phone_number.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.phone_number.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Profile Picture -->
+                <div class="mb-3">
+                    <label for="profile-picture" class="form-label">
+                        <i class="fas fa-camera me-2 text-warning"></i>Profile Picture
+                    </label>
+                    {{ form.profile_picture }}
+                    {% if form.profile_picture.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.profile_picture.errors }}
+                        </div>
+                    {% endif %}
+                    <button type="button" id="take-picture-button" class="btn btn-primary mt-2">
+                        <i class="fas fa-camera-retro"></i> Take Picture
+                    </button>
+                    <p id="camera-error-message" class="text-danger mt-2 d-none"></p>
+                    <img id="preview-picture" class="img-fluid mt-3 d-none" alt="Preview of profile picture" style="max-height: 150px; object-fit: cover;">
+                </div>
+
+                <!-- Assigned Houses -->
+                <div class="mb-3">
+                    <label for="assigned-houses" class="form-label">
+                        <i class="fas fa-home me-2 text-primary"></i>{{ form.assigned_houses.label }}
+                    </label>
+                    <ul class="list-group" id="assigned-houses-list">
+                        {% for house in form.fields.assigned_houses.queryset %}
+                        <li class="list-group-item">
+                            <input 
+                                type="checkbox" 
+                                id="house-{{ house.id }}" 
+                                name="assigned_houses" 
+                                value="{{ house.id }}" 
+                                {% if house in form.initial.assigned_houses %}checked{% endif %}>
+                            <label for="house-{{ house.id }}" class="ms-2">{{ house }}</label>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% if form.assigned_houses.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.assigned_houses.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Commission Rate -->
+                <div class="mb-3">
+                    <label for="{{ form.commission_rate.id_for_label }}" class="form-label">
+                        <i class="fas fa-percentage me-2 text-success"></i>{{ form.commission_rate.label }}
+                    </label>
+                    {{ form.commission_rate }}
+                    {% if form.commission_rate.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.commission_rate.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Is Verified -->
+                <div class="form-check mb-3">
+                    {{ form.is_verified }}
+                    <label class="form-check-label" for="{{ form.is_verified.id_for_label }}">
+                        <i class="fas fa-check-circle me-2 text-success"></i>{{ form.is_verified.label }}
+                    </label>
+                    {% if form.is_verified.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.is_verified.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Status -->
+                <div class="mb-3">
+                    <label for="{{ form.status.id_for_label }}" class="form-label">
+                        <i class="fas fa-info-circle me-2 text-info"></i>{{ form.status.label }}
+                    </label>
+                    {{ form.status }}
+                    {% if form.status.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.status.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Submit Button -->
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-success btn-lg">
+                        {% if agent %}
+                            <i class="fas fa-save me-2"></i>Update Agent
+                        {% else %}
+                            <i class="fas fa-save me-2"></i>Save Agent
+                        {% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Show/Hide Password, Camera Access, and Assigned Houses Sync -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Toggle Password Visibility
+        const togglePasswordButtons = document.querySelectorAll('.toggle-password');
+
+        togglePasswordButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const inputSelector = this.getAttribute('data-toggle');
+                const input = document.querySelector(inputSelector);
+                if (input) {
+                    const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                    input.setAttribute('type', type);
+
+                    // Toggle the eye icon
+                    const icon = this.querySelector('i');
+                    icon.classList.toggle('fa-eye');
+                    icon.classList.toggle('fa-eye-slash');
+                }
+            });
+        });
+
+        // Camera Access and Picture Preview
+        const takePictureButton = document.getElementById("take-picture-button");
+        const profilePictureInput = document.getElementById("id_profile_picture");
+        const cameraErrorMessage = document.getElementById("camera-error-message");
+        const previewPicture = document.getElementById("preview-picture");
+
+        // Check for camera availability
+        async function checkCameraAvailability() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                stream.getTracks().forEach(track => track.stop());
+                return true;
+            } catch (err) {
+                return false;
+            }
+        }
+
+        // Handle the "Take Picture" button click
+        takePictureButton.addEventListener("click", async () => {
+            const hasCamera = await checkCameraAvailability();
+
+            if (hasCamera) {
+                profilePictureInput.click();
+            } else {
+                cameraErrorMessage.textContent = "You do not have camera access. Please use the field above to upload.";
+                cameraErrorMessage.classList.remove("d-none");
+            }
+        });
+
+        // Preview the selected/taken picture
+        profilePictureInput.addEventListener("change", (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    previewPicture.src = e.target.result;
+                    previewPicture.classList.remove("d-none");
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewPicture.src = "";
+                previewPicture.classList.add("d-none");
+            }
+        });
+
+        // Assigned Houses Sync
+        const checkboxes = document.querySelectorAll("#assigned-houses-list input[type='checkbox']");
+        const multiSelect = document.querySelector("#id_assigned_houses");
+
+        checkboxes.forEach((checkbox) => {
+            checkbox.addEventListener("change", () => {
+                const selectedValues = Array.from(checkboxes)
+                    .filter((checkbox) => checkbox.checked)
+                    .map((checkbox) => checkbox.value);
+
+                // Update the multi-select field
+                Array.from(multiSelect.options).forEach((option) => {
+                    option.selected = selectedValues.includes(option.value);
+                });
+            });
+        });
+
+        // Initial sync if any checkboxes are pre-checked
+        const initialSelected = Array.from(checkboxes)
+            .filter((checkbox) => checkbox.checked)
+            .map((checkbox) => checkbox.value);
+
+        Array.from(multiSelect.options).forEach((option) => {
+            option.selected = initialSelected.includes(option.value);
+        });
+
+        // Bootstrap Form Validation
+        (function () {
+            'use strict'
+
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            var forms = document.querySelectorAll('.needs-validation')
+
+            // Loop over them and prevent submission
+            Array.prototype.slice.call(forms)
+                .forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+        })()
+    });
+</script>
+{% endblock %}
+
+{% block styles %}
+<style>
+    /* Additional Styling for Enhanced Appearance */
+    .card-header h2 {
+        font-weight: bold;
+    }
+
+    /* Position the eye icon within the input group */
+    .toggle-password {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        cursor: pointer;
+    }
+
+    .toggle-password i {
+        color: #6c757d;
+    }
+
+    .toggle-password:hover i {
+        color: #495057;
+    }
+
+    .img-thumbnail {
+        max-height: 150px;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .card-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .form-label i {
+            display: none; /* Hide icons on smaller screens to save space */
+        }
+
+        .toggle-password {
+            width: 35px;
+        }
+    }
+
+    /* Custom Styles for Validation */
+    .needs-validation .form-control:invalid,
+    .needs-validation .form-check-input:invalid {
+        border-color: #dc3545;
+    }
+
+    .needs-validation .form-control:valid,
+    .needs-validation .form-check-input:valid {
+        border-color: #198754;
+    }
+
+    .invalid-feedback {
+        display: none;
+    }
+
+    .form-control:invalid ~ .invalid-feedback,
+    .form-check-input:invalid ~ .invalid-feedback {
+        display: block;
+    }
+
+    /* Ensure input group buttons align properly */
+    .input-group .btn {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+
+    /* Adjusting the input group's button height to match the input */
+    .input-group .btn {
+        height: 100%;
+    }
+</style>
+{% endblock %}

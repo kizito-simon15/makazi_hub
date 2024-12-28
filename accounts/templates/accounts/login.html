@@ -1,0 +1,260 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Login</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+
+    <!-- Link to your PWA manifest (in static/manifest.json) -->
+    <link rel="manifest" href="{% static 'manifest.json' %}" />
+
+    <!-- Optional Apple Touch Icon & iOS meta (adjust path if needed) -->
+    <link rel="apple-touch-icon" href="{% static 'icons/apple-icon-180.png' %}" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+    <style>
+        /* iOS-like pastel gradient background */
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #ffa8e8, #a0e1ff, #baffc9);
+            background-size: 200% 200%;
+            animation: gradientShift 8s ease infinite;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .login-card {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            transform: translateY(30px);
+            opacity: 0;
+            animation: fadeInUp 0.7s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #ff75a0; /* Soft pastel accent */
+            margin-bottom: 20px;
+        }
+
+        .image-container img {
+            width: 80px;
+            height: auto;
+            margin-bottom: 20px;
+            animation: popIn 0.4s ease;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .field-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .form-control {
+            border-radius: 25px;
+            border: 2px solid #eedcff;
+            height: 50px;
+            padding-left: 50px;
+            font-size: 15px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            color: #333;
+            background: #fffdfd;
+        }
+
+        .form-control:focus {
+            border-color: #c77dff;
+            box-shadow: 0 0 5px rgba(199,125,255,0.2);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: #c77dff; /* Another pastel accent */
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: #c77dff;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, #ffa8e8, #a0e1ff);
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            height: 50px;
+            border-radius: 25px;
+            font-size: 16px;
+            transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.03);
+            background: linear-gradient(to right, #a0e1ff, #ffa8e8);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .text-links a {
+            color: #c77dff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .text-links a:hover {
+            color: #7b2cbf;
+            text-decoration: underline;
+        }
+
+        .alert {
+            border-radius: 10px;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            animation: fadeDown 0.5s ease forwards;
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+
+        @keyframes fadeDown {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 400px) {
+            h2 {
+                font-size: 1.4rem;
+            }
+            .form-control {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h2>Welcome to makazihub</h2>
+        <div class="image-container">
+            <img src="{% static 'images/house.png' %}" alt="House Icon">
+        </div>
+
+        <!-- Display error messages -->
+        {% if messages %}
+        <div class="alert alert-danger">
+            {% for message in messages %}
+                {{ message }}<br>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="field-container">
+                <i class="bi bi-person input-icon"></i>
+                <input type="text" class="form-control" name="identifier" placeholder="Username or Email" required>
+            </div>
+            <div class="field-container">
+                <i class="bi bi-lock input-icon"></i>
+                <i class="bi bi-eye toggle-password" onclick="togglePassword(this, 'password')"></i>
+                <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
+
+        <div class="text-center text-links mt-3">
+            <p>Don't have an account? <a href="/accounts/register/">Register</a></p>
+            <p>Forgot password? <a href="{% url 'forgot_password' %}">Get new one</a></p>
+            <p><a href="{% url 'browse_houses_public' %}">Browse as guest</a></p>
+        </div>
+    </div>
+
+    <!-- jQuery and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    {% if messages %}
+        {% for message in messages %}
+        <script type="text/javascript">
+            alert("{{ message|escapejs }}");
+        </script>
+        {% endfor %}
+    {% endif %}
+
+    <script>
+        function togglePassword(element, fieldId) {
+            const input = document.getElementById(fieldId);
+            if (input.type === "password") {
+                input.type = "text";
+                element.classList.remove("bi-eye");
+                element.classList.add("bi-eye-slash");
+            } else {
+                input.type = "password";
+                element.classList.remove("bi-eye-slash");
+                element.classList.add("bi-eye");
+            }
+        }
+    </script>
+
+    <!-- Service Worker Registration (place just before the closing body tag) -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register("{% static 'service-worker.js' %}")
+          .then((registration) => {
+            console.log('Service Worker registered with scope:', registration.scope);
+          })
+          .catch((error) => {
+            console.log('Service Worker registration failed:', error);
+          });
+      }
+    </script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+{% extends "client_base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid p-0" style="max-width: 600px; margin: 0 auto;">
+    <style>
+        body {
+            background-color: #ece5dd; /* WhatsApp-like background */
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+
+        .topbar {
+            background-color: #075e54;
+            color: #fff;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .topbar .title {
+            flex: 1;
+            text-align: center;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .topbar .back-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        /* Conversation list container */
+        .conversation-list {
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .agent-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+            text-decoration: none;
+            color: #333;
+            transition: background 0.3s;
+        }
+
+        .agent-item:last-child {
+            border-bottom: none;
+        }
+
+        .agent-item:hover {
+            background: #f0f0f0;
+        }
+
+        .agent-item img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+            border: 2px solid #ddd;
+        }
+
+        .agent-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .agent-info .top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .agent-info .name {
+            font-weight: 600;
+            font-size: 16px;
+            color: #111;
+        }
+
+        .agent-info .last-message-time {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .unread-badge {
+            background: #25d366;
+            color: #fff;
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 12px;
+            margin-left: 10px;
+            font-weight: 500;
+        }
+
+        /* Add an icon to represent conversation */
+        .agent-icon {
+            margin-right: 8px;
+            font-size: 18px;
+            color: #075e54;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .agent-item img {
+                width: 40px;
+                height: 40px;
+            }
+
+            .agent-info .name {
+                font-size: 14px;
+            }
+
+            .agent-info .last-message-time {
+                font-size: 11px;
+            }
+        }
+    </style>
+
+    <!-- Top bar -->
+    <div class="topbar">
+        <button class="back-btn" onclick="window.history.back();">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <div class="title">Your Conversations</div>
+        <!-- Optionally add another icon or leave blank -->
+        <div style="width: 30px;"></div>
+    </div>
+
+    <!-- Conversation List -->
+    <div class="conversation-list mt-3">
+        {% for data in agents_data %}
+        <a href="{% if data.house_id %}{% url 'send_message' house_id=data.house_id agent_id=data.agent.id %}{% else %}#{% endif %}" class="agent-item">
+            <img src="{% if data.agent.profile_picture %}{{ data.agent.profile_picture.url }}{% else %}{% static 'images/default.png' %}{% endif %}" alt="{{ data.agent.first_name }}">
+            <div class="agent-info">
+                <div class="top-row">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-user-tie agent-icon"></i>
+                        <span class="name">{{ data.agent.first_name }} {{ data.agent.last_name }}</span>
+                    </div>
+                    {% if data.last_reply_time %}
+                    <span class="last-message-time">
+                        {{ data.last_reply_time|date:"M d, H:i" }}
+                    </span>
+                    {% endif %}
+                </div>
+                {% if data.unread_count > 0 %}
+                    <span class="unread-badge">{{ data.unread_count }} new</span>
+                {% endif %}
+            </div>
+        </a>
+        {% empty %}
+        <p class="text-center text-muted p-4 mb-0">No conversations yet.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

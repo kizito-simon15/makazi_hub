@@ -1,0 +1,640 @@
+{% extends 'owner_base.html' %}
+{% load static %}
+
+{% block extra_head %}
+<style>
+/* ================================
+   1. Base & Background
+   ================================ */
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Subtle gradient background */
+body {
+  background: linear-gradient(120deg, #f4f4f8, #ffffff, #e6ebf5);
+  background-size: 200% 200%;
+  color: #333;
+  padding: 20px;
+}
+
+/* ================================
+   2. Container & Card
+   ================================ */
+.container {
+  max-width: 600px;
+  margin: 60px auto; /* Centered */
+}
+
+/* Simple card-like container */
+.card {
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 25px;
+}
+
+/* Page heading */
+h2 {
+  text-align: center;
+  margin-bottom: 10px;
+  color: #444;
+}
+
+/* Sub-text below heading */
+p.text-center.text-muted {
+  font-size: 0.95rem;
+  margin-bottom: 20px;
+  color: #888;
+}
+
+/* ================================
+   3. Icon Toggle Groups
+   ================================ */
+.icon-toggle-group {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border-radius: 8px;
+  background: #f7f7f9;
+  transition: box-shadow 0.2s;
+}
+.icon-toggle-group:hover {
+  box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+}
+
+/* Label for each question */
+.icon-toggle-label {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+/* Eye icon for collapsible details */
+.info-icon {
+  margin-left: 8px;
+  font-size: 1.1rem;
+  color: #6c757d;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.info-icon:hover {
+  color: #333;
+}
+
+/* Yes/No icons */
+.icon-toggle {
+  font-size: 1.8rem;
+  margin-right: 1.5rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, color 0.2s;
+}
+.icon-toggle.selected {
+  transform: scale(1.15);
+  color: #444;
+}
+.icon-toggle.yes-icon {
+  color: #28a745; /* green */
+}
+.icon-toggle.no-icon {
+  color: #dc3545; /* red */
+}
+
+/* Collapsible details text */
+.info-details {
+  margin-left: 0.5rem;
+  font-size: 0.9rem;
+  color: #555;
+  border-left: 3px solid #e9ecef;
+  padding-left: 1rem;
+}
+
+/* Bootstrap's collapse hidden by default (no fancy animations needed) */
+.collapse:not(.show) {
+  display: none;
+}
+
+/* ================================
+   4. Buttons
+   ================================ */
+.btn-primary {
+  background-color: #0069d9;
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  border-radius: 25px;
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.btn-primary:hover {
+  background-color: #0053b3;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+.btn-primary i {
+  margin-right: 5px;
+}
+
+hr.my-4 {
+  margin-top: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="card">
+    <h2 class="mb-4 text-center">Step 2: Security, Design &amp; Location</h2>
+    <p class="text-center text-muted">
+      For {{ house.house_name }}
+    </p>
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      <!-- 1) Security: has_fence -->
+      <div class="icon-toggle-group" data-field="{{ form.has_fence.html_name }}">
+        <label class="icon-toggle-label">
+          {{ form.has_fence.label }}
+          <i class="fas fa-eye info-icon" data-bs-toggle="collapse" data-bs-target="#descHasFence"></i>
+        </label>
+        <div class="collapse info-details" id="descHasFence">
+          <p>Is the property surrounded by a fence or boundary wall for security?</p>
+        </div>
+        <input type="hidden"
+               name="{{ form.has_fence.html_name }}"
+               value="{{ form.has_fence.value|default_if_none:'False' }}">
+        <i class="far fa-check-circle icon-toggle yes-icon
+           {% if form.has_fence.value == True %}selected{% endif %}">
+        </i>
+        <i class="far fa-times-circle icon-toggle no-icon
+           {% if form.has_fence.value == False or form.has_fence.value == '' %}selected{% endif %}">
+        </i>
+      </div>
+
+      <!-- 2) Security: has_cctv_cameras -->
+      <div class="icon-toggle-group" data-field="{{ form.has_cctv_cameras.html_name }}">
+        <label class="icon-toggle-label">
+          {{ form.has_cctv_cameras.label }}
+          <i class="fas fa-eye info-icon" data-bs-toggle="collapse" data-bs-target="#descHasCctvCameras"></i>
+        </label>
+        <div class="collapse info-details" id="descHasCctvCameras">
+          <p>Are there security cameras installed on the property for surveillance?</p>
+        </div>
+        <input type="hidden"
+               name="{{ form.has_cctv_cameras.html_name }}"
+               value="{{ form.has_cctv_cameras.value|default_if_none:'False' }}">
+        <i class="far fa-check-circle icon-toggle yes-icon
+           {% if form.has_cctv_cameras.value == True %}selected{% endif %}">
+        </i>
+        <i class="far fa-times-circle icon-toggle no-icon
+           {% if form.has_cctv_cameras.value == False or form.has_cctv_cameras.value == '' %}selected{% endif %}">
+        </i>
+      </div>
+
+      <!-- 3) Security: has_security_guard -->
+      <div class="icon-toggle-group" data-field="{{ form.has_security_guard.html_name }}">
+        <label class="icon-toggle-label">
+          {{ form.has_security_guard.label }}
+          <i class="fas fa-eye info-icon" data-bs-toggle="collapse" data-bs-target="#descHasSecurityGuard"></i>
+        </label>
+        <div class="collapse info-details" id="descHasSecurityGuard">
+          <p>Is there a security guard or gatekeeper on site?</p>
+        </div>
+        <input type="hidden"
+               name="{{ form.has_security_guard.html_name }}"
+               value="{{ form.has_security_guard.value|default_if_none:'False' }}">
+        <i class="far fa-check-circle icon-toggle yes-icon
+           {% if form.has_security_guard.value == True %}selected{% endif %}">
+        </i>
+        <i class="far fa-times-circle icon-toggle no-icon
+           {% if form.has_security_guard.value == False or form.has_security_guard.value == '' %}selected{% endif %}">
+        </i>
+      </div>
+
+      <!-- 4) Security: has_grill_doors_and_windows -->
+      <div class="icon-toggle-group" data-field="{{ form.has_grill_doors_and_windows.html_name }}">
+        <label class="icon-toggle-label">
+          {{ form.has_grill_doors_and_windows.label }}
+          <i class="fas fa-eye info-icon" data-bs-toggle="collapse" data-bs-target="#descHasGrillDoors"></i>
+        </label>
+        <div class="collapse info-details" id="descHasGrillDoors">
+          <p>Security grills on doors or windows to prevent forced entry.</p>
+        </div>
+        <input type="hidden"
+               name="{{ form.has_grill_doors_and_windows.html_name }}"
+               value="{{ form.has_grill_doors_and_windows.value|default_if_none:'False' }}">
+        <i class="far fa-check-circle icon-toggle yes-icon
+           {% if form.has_grill_doors_and_windows.value == True %}selected{% endif %}">
+        </i>
+        <i class="far fa-times-circle icon-toggle no-icon
+           {% if form.has_grill_doors_and_windows.value == False or form.has_grill_doors_and_windows.value == '' %}selected{% endif %}">
+        </i>
+      </div>
+
+      <hr class="my-4"/>
+
+      <!-- 5) Design: is_modern_design -->
+      <div class="icon-toggle-group" data-field="{{ form.is_modern_design.html_name }}">
+        <label class="icon-toggle-label">
+          {{ form.is_modern_design.label }}
+          <i class="fas fa-eye info-icon" data-bs-toggle="collapse" data-bs-target="#descIsModernDesign"></i>
+        </label>
+        <div class="collapse info-details" id="descIsModernDesign">
+          <p>Has an updated, contemporary architectural style and layout.</p>
+        </div>
+        <input type="hidden"
+               name="{{ form.is_modern_design.html_name }}"
+               value="{{ form.is_modern_design.value|default_if_none:'False' }}">
+        <i class="far fa-check-circle icon-toggle yes-icon
+           {% if form.is_modern_design.value == True %}selected{% endif %}">
+        </i>
+        <i class="far fa-times-circle icon-toggle no-icon
+           {% if form.is_modern_design.value == False or form.is_modern_design.value == '' %}selected{% endif %}">
+        </i>
+      </div>
+
+      <!-- 6) Design: has_floors -->
+      <div class="icon-toggle-group" data-field="{{ form.has_floors.html_name }}">
+        <label class="icon-toggle-label">
+          {{ form.has_floors.label }}
+          <i class="fas fa-eye info-icon" data-bs-toggle="collapse" data-bs-target="#descHasFloors"></i>
+        </label>
+        <div class="collapse info-details" id="descHasFloors">
+          <p>Indicates multiple levels (e.g., 2-story, 3-story) in the building.</p>
+        </div>
+        <input type="hidden"
+               name="{{ form.has_floors.html_name }}"
+               value="{{ form.has_floors.value|default_if_none:'False' }}">
+        <i class="far fa-check-circle icon-toggle yes-icon
+           {% if form.has_floors.value == True %}selected{% endif %}">
+        </i>
+        <i class="far fa-times-circle icon-toggle no-icon
+           {% if form.has_floors.value == False or form.has_floors.value == '' %}selected{% endif %}">
+        </i>
+      </div>
+
+      <!-- 7) Design: has_outdoor_seating_area -->
+      <div class="icon-toggle-group" data-field="{{ form.has_outdoor_seating_area.html_name }}">
+        <label class="icon-toggle-label">
+          {{ form.has_outdoor_seating_area.label }}
+          <i class="fas fa-eye info-icon" data-bs-toggle="collapse" data-bs-target="#descHasOutdoorSeating"></i>
+        </label>
+        <div class="collapse info-details" id="descHasOutdoorSeating">
+          <p>A patio, deck, or veranda where people can sit outside.</p>
+        </div>
+        <input type="hidden"
+               name="{{ form.has_outdoor_seating_area.html_name }}"
+               value="{{ form.has_outdoor_seating_area.value|default_if_none:'False' }}">
+        <i class="far fa-check-circle icon-toggle yes-icon
+           {% if form.has_outdoor_seating_area.value == True %}selected{% endif %}">
+        </i>
+        <i class="far fa-times-circle icon-toggle no-icon
+           {% if form.has_outdoor_seating_area.value == False or form.has_outdoor_seating_area.value == '' %}selected{% endif %}">
+        </i>
+      </div>
+
+      <!-- 8) Design: has_garden -->
+      <div class="icon-toggle-group" data-field="{{ form.has_garden.html_name }}">
+        <label class="icon-toggle-label">
+          {{ form.has_garden.label }}
+          <i class="fas fa-eye info-icon" data-bs-toggle="collapse" data-bs-target="#descHasGarden"></i>
+        </label>
+        <div class="collapse info-details" id="descHasGarden">
+          <p>Landscaped area with plants, flowers, or lawn on the property.</p>
+        </div>
+        <input type="hidden"
+               name="{{ form.has_garden.html_name }}"
+               value="{{ form.has_garden.value|default_if_none:'False' }}">
+        <i class="far fa-check-circle icon-toggle yes-icon
+           {% if form.has_garden.value == True %}selected{% endif %}">
+        </i>
+        <i class="far fa-times-circle icon-toggle no-icon
+           {% if form.has_garden.value == False or form.has_garden.value == '' %}selected{% endif %}">
+        </i>
+      </div>
+
+      <!-- 9) Design: has_entertaining_area -->
+      <div class="icon-toggle-group" data-field="{{ form.has_entertaining_area.html_name }}">
+        <label class="icon-toggle-label">
+          {{ form.has_entertaining_area.label }}
+          <i class="fas fa-eye info-icon" data-bs-toggle="collapse" data-bs-target="#descHasEntertainingArea"></i>
+        </label>
+        <div class="collapse info-details" id="descHasEntertainingArea">
+          <p>An area designed for social gatherings, barbecues, parties, etc.</p>
+        </div>
+        <input type="hidden"
+               name="{{ form.has_entertaining_area.html_name }}"
+               value="{{ form.has_entertaining_area.value|default_if_none:'False' }}">
+        <i class="far fa-check-circle icon-toggle yes-icon
+           {% if form.has_entertaining_area.value == True %}selected{% endif %}">
+        </i>
+        <i class="far fa-times-circle icon-toggle no-icon
+           {% if form.has_entertaining_area.value == False or form.has_entertaining_area.value == '' %}selected{% endif %}">
+        </i>
+      </div>
+
+      <!-- 10) Design: has_rooftop_for_resting -->
+      <div class="icon-toggle-group" data-field="{{ form.has_rooftop_for_resting.html_name }}">
+        <label class="icon-toggle-label">
+          {{ form.has_rooftop_for_resting.label }}
+          <i class="fas fa-eye info-icon" data-bs-toggle="collapse" data-bs-target="#descHasRooftop"></i>
+        </label>
+        <div class="collapse info-details" id="descHasRooftop">
+          <p>An accessible rooftop deck or terrace for relaxation, seating, etc.</p>
+        </div>
+        <input type="hidden"
+               name="{{ form.has_rooftop_for_resting.html_name }}"
+               value="{{ form.has_rooftop_for_resting.value|default_if_none:'False' }}">
+        <i class="far fa-check-circle icon-toggle yes-icon
+           {% if form.has_rooftop_for_resting.value == True %}selected{% endif %}">
+        </i>
+        <i class="far fa-times-circle icon-toggle no-icon
+           {% if form.has_rooftop_for_resting.value == False or form.has_rooftop_for_resting.value == '' %}selected{% endif %}">
+        </i>
+      </div>
+
+      <!-- 11) Design: is_disability_friendly -->
+      <div class="icon-toggle-group" data-field="{{ form.is_disability_friendly.html_name }}">
+        <label class="icon-toggle-label">
+          {{ form.is_disability_friendly.label }}
+          <i class="fas fa-eye info-icon" data-bs-toggle="collapse" data-bs-target="#descIsDisabilityFriendly"></i>
+        </label>
+        <div class="collapse info-details" id="descIsDisabilityFriendly">
+          <p>Wheelchair ramps, wide doorways, accessible restrooms, etc.</p>
+        </div>
+        <input type="hidden"
+               name="{{ form.is_disability_friendly.html_name }}"
+               value="{{ form.is_disability_friendly.value|default_if_none:'False' }}">
+        <i class="far fa-check-circle icon-toggle yes-icon
+           {% if form.is_disability_friendly.value == True %}selected{% endif %}">
+        </i>
+        <i class="far fa-times-circle icon-toggle no-icon
+           {% if form.is_disability_friendly.value == False or form.is_disability_friendly.value == '' %}selected{% endif %}">
+        </i>
+      </div>
+
+      <!-- 12) Design: has_elevator -->
+      <div class="icon-toggle-group" data-field="{{ form.has_elevator.html_name }}">
+        <label class="icon-toggle-label">
+          {{ form.has_elevator.label }}
+          <i class="fas fa-eye info-icon" data-bs-toggle="collapse" data-bs-target="#descHasElevator"></i>
+        </label>
+        <div class="collapse info-details" id="descHasElevator">
+          <p>Building is equipped with a working lift/elevator.</p>
+        </div>
+        <input type="hidden"
+               name="{{ form.has_elevator.html_name }}"
+               value="{{ form.has_elevator.value|default_if_none:'False' }}">
+        <i class="far fa-check-circle icon-toggle yes-icon
+           {% if form.has_elevator.value == True %}selected{% endif %}">
+        </i>
+        <i class="far fa-times-circle icon-toggle no-icon
+           {% if form.has_elevator.value == False or form.has_elevator.value == '' %}selected{% endif %}">
+        </i>
+      </div>
+
+      <hr class="my-4"/>
+
+      <!-- 13) Location: is_near_schools -->
+      <div class="icon-toggle-group" data-field="{{ form.is_near_schools.html_name }}">
+        <label class="icon-toggle-label">
+          {{ form.is_near_schools.label }}
+          <i class="fas fa-eye info-icon" data-bs-toggle="collapse" data-bs-target="#descIsNearSchools"></i>
+        </label>
+        <div class="collapse info-details" id="descIsNearSchools">
+          <p>Is the house close to one or more schools?</p>
+        </div>
+        <input type="hidden"
+               name="{{ form.is_near_schools.html_name }}"
+               value="{{ form.is_near_schools.value|default_if_none:'False' }}">
+        <i class="far fa-check-circle icon-toggle yes-icon
+           {% if form.is_near_schools.value == True %}selected{% endif %}">
+        </i>
+        <i class="far fa-times-circle icon-toggle no-icon
+           {% if form.is_near_schools.value == False or form.is_near_schools.value == '' %}selected{% endif %}">
+        </i>
+      </div>
+
+      <!-- 14) Location: is_near_hospital -->
+      <div class="icon-toggle-group" data-field="{{ form.is_near_hospital.html_name }}">
+        <label class="icon-toggle-label">
+          {{ form.is_near_hospital.label }}
+          <i class="fas fa-eye info-icon" data-bs-toggle="collapse" data-bs-target="#descIsNearHospital"></i>
+        </label>
+        <div class="collapse info-details" id="descIsNearHospital">
+          <p>Nearby clinics or hospitals for quick medical access.</p>
+        </div>
+        <input type="hidden"
+               name="{{ form.is_near_hospital.html_name }}"
+               value="{{ form.is_near_hospital.value|default_if_none:'False' }}">
+        <i class="far fa-check-circle icon-toggle yes-icon
+           {% if form.is_near_hospital.value == True %}selected{% endif %}">
+        </i>
+        <i class="far fa-times-circle icon-toggle no-icon
+           {% if form.is_near_hospital.value == False or form.is_near_hospital.value == '' %}selected{% endif %}">
+        </i>
+      </div>
+
+      <!-- 15) Location: is_near_ocean_river_lake -->
+      <div class="icon-toggle-group" data-field="{{ form.is_near_ocean_river_lake.html_name }}">
+        <label class="icon-toggle-label">
+          {{ form.is_near_ocean_river_lake.label }}
+          <i class="fas fa-eye info-icon" data-bs-toggle="collapse" data-bs-target="#descIsNearWater"></i>
+        </label>
+        <div class="collapse info-details" id="descIsNearWater">
+          <p>Proximity to ocean, river, lake, or other waterfront areas.</p>
+        </div>
+        <input type="hidden"
+               name="{{ form.is_near_ocean_river_lake.html_name }}"
+               value="{{ form.is_near_ocean_river_lake.value|default_if_none:'False' }}">
+        <i class="far fa-check-circle icon-toggle yes-icon
+           {% if form.is_near_ocean_river_lake.value == True %}selected{% endif %}">
+        </i>
+        <i class="far fa-times-circle icon-toggle no-icon
+           {% if form.is_near_ocean_river_lake.value == False or form.is_near_ocean_river_lake.value == '' %}selected{% endif %}">
+        </i>
+      </div>
+
+      <!-- 16) Location: is_in_quiet_area -->
+      <div class="icon-toggle-group" data-field="{{ form.is_in_quiet_area.html_name }}">
+        <label class="icon-toggle-label">
+          {{ form.is_in_quiet_area.label }}
+          <i class="fas fa-eye info-icon" data-bs-toggle="collapse" data-bs-target="#descIsInQuietArea"></i>
+        </label>
+        <div class="collapse info-details" id="descIsInQuietArea">
+          <p>Low noise pollution, not near major roads or loud neighbors.</p>
+        </div>
+        <input type="hidden"
+               name="{{ form.is_in_quiet_area.html_name }}"
+               value="{{ form.is_in_quiet_area.value|default_if_none:'False' }}">
+        <i class="far fa-check-circle icon-toggle yes-icon
+           {% if form.is_in_quiet_area.value == True %}selected{% endif %}">
+        </i>
+        <i class="far fa-times-circle icon-toggle no-icon
+           {% if form.is_in_quiet_area.value == False or form.is_in_quiet_area.value == '' %}selected{% endif %}">
+        </i>
+      </div>
+
+      <!-- 17) Location: is_near_commercial_center -->
+      <div class="icon-toggle-group" data-field="{{ form.is_near_commercial_center.html_name }}">
+        <label class="icon-toggle-label">
+          {{ form.is_near_commercial_center.label }}
+          <i class="fas fa-eye info-icon" data-bs-toggle="collapse" data-bs-target="#descIsNearCommercialCenter"></i>
+        </label>
+        <div class="collapse info-details" id="descIsNearCommercialCenter">
+          <p>Close to shops, malls, markets, or business districts.</p>
+        </div>
+        <input type="hidden"
+               name="{{ form.is_near_commercial_center.html_name }}"
+               value="{{ form.is_near_commercial_center.value|default_if_none:'False' }}">
+        <i class="far fa-check-circle icon-toggle yes-icon
+           {% if form.is_near_commercial_center.value == True %}selected{% endif %}">
+        </i>
+        <i class="far fa-times-circle icon-toggle no-icon
+           {% if form.is_near_commercial_center.value == False or form.is_near_commercial_center.value == '' %}selected{% endif %}">
+        </i>
+      </div>
+
+      <hr class="my-4"/>
+
+      <!-- 18) Historical: has_historical_significance -->
+      <div class="icon-toggle-group" data-field="{{ form.has_historical_significance.html_name }}">
+        <label class="icon-toggle-label">
+          {{ form.has_historical_significance.label }}
+          <i class="fas fa-eye info-icon" data-bs-toggle="collapse" data-bs-target="#descHasHistoricalSignificance"></i>
+        </label>
+        <div class="collapse info-details" id="descHasHistoricalSignificance">
+          <p>Property recognized for its heritage, unique past, or architectural value.</p>
+        </div>
+        <input type="hidden"
+               name="{{ form.has_historical_significance.html_name }}"
+               value="{{ form.has_historical_significance.value|default_if_none:'False' }}">
+        <i class="far fa-check-circle icon-toggle yes-icon
+           {% if form.has_historical_significance.value == True %}selected{% endif %}">
+        </i>
+        <i class="far fa-times-circle icon-toggle no-icon
+           {% if form.has_historical_significance.value == False or form.has_historical_significance.value == '' %}selected{% endif %}">
+        </i>
+      </div>
+
+      <!-- 19) Historical: was_stayed_by_celebrity -->
+      <div class="icon-toggle-group" data-field="{{ form.was_stayed_by_celebrity.html_name }}">
+        <label class="icon-toggle-label">
+          {{ form.was_stayed_by_celebrity.label }}
+          <i class="fas fa-eye info-icon" data-bs-toggle="collapse" data-bs-target="#descWasStayedByCelebrity"></i>
+        </label>
+        <div class="collapse info-details" id="descWasStayedByCelebrity">
+          <p>Any notable persons or celebrities lived or stayed in this property?</p>
+        </div>
+        <input type="hidden"
+               name="{{ form.was_stayed_by_celebrity.html_name }}"
+               value="{{ form.was_stayed_by_celebrity.value|default_if_none:'False' }}">
+        <i class="far fa-check-circle icon-toggle yes-icon
+           {% if form.was_stayed_by_celebrity.value == True %}selected{% endif %}">
+        </i>
+        <i class="far fa-times-circle icon-toggle no-icon
+           {% if form.was_stayed_by_celebrity.value == False or form.was_stayed_by_celebrity.value == '' %}selected{% endif %}">
+        </i>
+      </div>
+
+      <hr class="my-4"/>
+
+      <!-- 20) Payment: allows_installment_payment -->
+      <div class="icon-toggle-group" data-field="{{ form.allows_installment_payment.html_name }}">
+        <label class="icon-toggle-label">
+          {{ form.allows_installment_payment.label }}
+          <i class="fas fa-eye info-icon" data-bs-toggle="collapse" data-bs-target="#descAllowsInstallments"></i>
+        </label>
+        <div class="collapse info-details" id="descAllowsInstallments">
+          <p>Owner allows tenants to pay rent in scheduled installments.</p>
+        </div>
+        <input type="hidden"
+               name="{{ form.allows_installment_payment.html_name }}"
+               value="{{ form.allows_installment_payment.value|default_if_none:'False' }}">
+        <i class="far fa-check-circle icon-toggle yes-icon
+           {% if form.allows_installment_payment.value == True %}selected{% endif %}">
+        </i>
+        <i class="far fa-times-circle icon-toggle no-icon
+           {% if form.allows_installment_payment.value == False or form.allows_installment_payment.value == '' %}selected{% endif %}">
+        </i>
+      </div>
+
+      <!-- 21) Payment: rent_includes_other_services -->
+      <div class="icon-toggle-group" data-field="{{ form.rent_includes_other_services.html_name }}">
+        <label class="icon-toggle-label">
+          {{ form.rent_includes_other_services.label }}
+          <i class="fas fa-eye info-icon" data-bs-toggle="collapse" data-bs-target="#descRentIncludesServices"></i>
+        </label>
+        <div class="collapse info-details" id="descRentIncludesServices">
+          <p>Does rent cover water, electricity, internet, or other utilities?</p>
+        </div>
+        <input type="hidden"
+               name="{{ form.rent_includes_other_services.html_name }}"
+               value="{{ form.rent_includes_other_services.value|default_if_none:'False' }}">
+        <i class="far fa-check-circle icon-toggle yes-icon
+           {% if form.rent_includes_other_services.value == True %}selected{% endif %}">
+        </i>
+        <i class="far fa-times-circle icon-toggle no-icon
+           {% if form.rent_includes_other_services.value == False or form.rent_includes_other_services.value == '' %}selected{% endif %}">
+        </i>
+      </div>
+
+      <!-- 22) Location: is_near_ocean_river_lake -->
+      <div class="icon-toggle-group" data-field="{{ form.is_family_friendly.html_name }}">
+        <label class="icon-toggle-label">
+          {{ form.is_family_friendly.label }}
+          <i class="fas fa-eye info-icon" data-bs-toggle="collapse" data-bs-target="#descIsNearWater"></i>
+        </label>
+        <div class="collapse info-details" id="descIsNearWater">
+          <p>Is the house very friendly for the families to live.</p>
+        </div>
+        <input type="hidden"
+               name="{{ form.is_family_friendly.html_name }}"
+               value="{{ form.is_family_friendly.value|default_if_none:'False' }}">
+        <i class="far fa-check-circle icon-toggle yes-icon
+           {% if form.is_family_friendly.value == True %}selected{% endif %}">
+        </i>
+        <i class="far fa-times-circle icon-toggle no-icon
+           {% if form.is_family_friendly.value == False or form.is_family_friendly.value == '' %}selected{% endif %}">
+        </i>
+      </div>
+
+
+      <div class="mt-4 text-center">
+        <button type="submit" class="btn btn-primary px-4 py-2">
+          <i class="fas fa-save me-1"></i> Save Step 2 Features
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- JavaScript to handle the icon toggles -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.icon-toggle-group').forEach(group => {
+    const hiddenInput = group.querySelector('input[type="hidden"]');
+    const yesIcon = group.querySelector('.yes-icon');
+    const noIcon  = group.querySelector('.no-icon');
+
+    yesIcon.addEventListener('click', () => {
+      hiddenInput.value = 'True';
+      yesIcon.classList.add('selected');
+      noIcon.classList.remove('selected');
+    });
+
+    noIcon.addEventListener('click', () => {
+      hiddenInput.value = 'False';
+      noIcon.classList.add('selected');
+      yesIcon.classList.remove('selected');
+    });
+  });
+});
+</script>
+{% endblock %}

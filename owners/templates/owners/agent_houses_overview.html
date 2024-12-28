@@ -1,0 +1,440 @@
+{% extends 'agent_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid" style="margin-top: 50px; background: #f5f5f7; min-height: calc(100vh - 50px); padding-bottom: 30px;">
+
+    <style>
+        body {
+            background-color: #f5f5f7;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .overview-container {
+            max-width: 900px;
+            margin: 30px auto;
+            background: linear-gradient(135deg, #ffffff, #f3f8ff);
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            padding: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        .overview-header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .overview-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+
+        .overview-header h2 i {
+            font-size: 28px;
+            color: #007aff;
+        }
+
+        .overview-header p {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .add-promotions-btn {
+            position: absolute;
+            right: 0;
+            top: 0;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 15px;
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+
+        .add-promotions-btn i {
+            margin-right: 5px;
+            font-size: 16px;
+        }
+
+        .add-promotions-btn:hover {
+            background: linear-gradient(135deg, #5c0eb5, #1e64d4);
+            text-decoration: none;
+            color: #fff;
+        }
+
+        .house-block {
+            background: #ffffff;
+            border-radius: 15px;
+            border: 1px solid #eee;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            margin-bottom: 30px;
+        }
+
+        .house-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            cursor: pointer;
+            user-select: none;
+            background: linear-gradient(135deg, #e0f7fa, #ffffff);
+            border-radius: 15px 15px 0 0;
+        }
+
+        .house-header h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #007aff;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .house-header h3 i {
+            font-size: 22px;
+        }
+
+        .toggle-icon {
+            font-size: 20px;
+            color: #888;
+            transition: transform 0.3s;
+        }
+
+        .toggle-icon.open {
+            transform: rotate(90deg);
+        }
+
+        .house-details-container {
+            display: none;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 0 0 15px 15px;
+        }
+
+        .house-details {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            margin-top: 10px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title i {
+            font-size: 18px;
+            color: #007aff;
+        }
+
+        .media-gallery {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .media-item {
+            background: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .media-item img,
+        .media-item video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .media-caption {
+            font-size: 12px;
+            color: #333;
+            padding: 5px;
+            background: #f9f9f9;
+        }
+
+        .promotion-block {
+            background: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .promotion-block h4 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #007aff;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .promotion-block h4 i {
+            font-size: 16px;
+        }
+
+        .promotion-description {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .room-block {
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .room-block h5 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #007aff;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .room-block p {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .bill-block {
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .bill-block h5 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .bill-details {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.4;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 600px) {
+            .media-gallery {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <div class="overview-container">
+        <div class="overview-header">
+            <h2><i class="fas fa-home"></i>Assigned Houses Overview</h2>
+            <p>Below are all the houses you're assigned to, with their details, promotions, and rooms.</p>
+            <a href="{% url 'promotion_step1' %}" class="add-promotions-btn">
+                <i class="fas fa-plus"></i> Add promotions
+            </a>
+        </div>
+
+        {% if houses_data %}
+            {% for hd in houses_data %}
+            <div class="house-block">
+                <div class="house-header">
+                    <h3><i class="fas fa-map-marker-alt"></i>{{ hd.house.house_name }} ({{ hd.house.house_type }})</h3>
+                    <i class="fas fa-chevron-right toggle-icon"></i>
+                </div>
+                <div class="house-details-container">
+                    <div class="house-details">
+                        <strong>Location:</strong> {{ hd.house.region }}, {{ hd.house.district }}, {{ hd.house.ward }}, {{ hd.house.street }} - House #{{ hd.house.house_number }}<br>
+                        <strong>Furnishing:</strong> {{ hd.house.furnishing_status }}<br>
+                        <strong>Amenities:</strong> {{ hd.house.amenities|default:"N/A" }}<br>
+                        <strong>Utilities:</strong> {{ hd.house.utilities_included|default:"N/A" }}<br>
+                        <strong>Rules:</strong> {{ hd.house.rules_and_restrictions|default:"N/A" }}
+                    </div>
+
+                    {% if hd.house_video or hd.house_photos %}
+                        <h4 class="section-title"><i class="fas fa-images"></i>House Media</h4>
+                        <div class="media-gallery">
+                            {% if hd.house_video %}
+                            <div class="media-item">
+                                <video controls><source src="{{ hd.house_video.media_file.url }}" type="video/mp4"></video>
+                            </div>
+                            {% endif %}
+                            {% for photo in hd.house_photos %}
+                            <div class="media-item">
+                                <img src="{{ photo.media_file.url }}" alt="House Photo">
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    {% if hd.house_promotions %}
+                        <h4 class="section-title"><i class="fas fa-bullhorn"></i>House Promotions</h4>
+                        {% for p in hd.house_promotions %}
+                        <div class="promotion-block">
+                            <h4><i class="fas fa-home"></i>House Promotion</h4>
+                            <div class="promotion-description">
+                                {{ p.promotion.description|linebreaks }}
+                            </div>
+                            {% if p.media %}
+                            <div class="media-gallery">
+                                {% for m in p.media %}
+                                <div class="media-item">
+                                    {% if m.media_type == 'image' %}
+                                        <img src="{{ m.file.url }}" alt="Promotion Media">
+                                    {% else %}
+                                        <video controls><source src="{{ m.file.url }}" type="video/mp4"></video>
+                                    {% endif %}
+                                    {% if m.caption %}
+                                    <div class="media-caption">{{ m.caption }}</div>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                                <p class="text-muted" style="font-size:14px;">No media for this house promotion.</p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if hd.rooms %}
+                        <h4 class="section-title"><i class="fas fa-bed"></i>Rooms in this House</h4>
+                        {% for rm in hd.rooms %}
+                        <div class="room-block">
+                            <h5><i class="fas fa-door-open"></i>Room {{ rm.room.room_number }} - {{ rm.room.availability_status }}</h5>
+                            <p><strong>Price:</strong> {{ rm.room.rental_price }} TZS<br>
+                               {{ rm.room.description|default:"No description provided." }}</p>
+
+                            {% if rm.room_video or rm.room_photos %}
+                                <h4 class="section-title"><i class="fas fa-images"></i>Room Media</h4>
+                                <div class="media-gallery">
+                                    {% if rm.room_video %}
+                                    <div class="media-item">
+                                        <video controls><source src="{{ rm.room_video.media_file.url }}" type="video/mp4"></video>
+                                    </div>
+                                    {% endif %}
+                                    {% for rph in rm.room_photos %}
+                                    <div class="media-item">
+                                        <img src="{{ rph.media_file.url }}" alt="Room Photo">
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            {% if rm.promotions %}
+                                <h4 class="section-title"><i class="fas fa-bullhorn"></i>Room Promotions</h4>
+                                {% for rp in rm.promotions %}
+                                <div class="promotion-block">
+                                    <h4><i class="fas fa-door-open"></i>Room Promotion</h4>
+                                    <div class="promotion-description">
+                                        {{ rp.promotion.description|linebreaks }}
+                                    </div>
+                                    {% if rp.media %}
+                                    <div class="media-gallery">
+                                        {% for rpm in rp.media %}
+                                        <div class="media-item">
+                                            {% if rpm.media_type == 'image' %}
+                                                <img src="{{ rpm.file.url }}" alt="Promotion Media">
+                                            {% else %}
+                                                <video controls><source src="{{ rpm.file.url }}" type="video/mp4"></video>
+                                            {% endif %}
+                                            {% if rpm.caption %}
+                                            <div class="media-caption">{{ rpm.caption }}</div>
+                                            {% endif %}
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% else %}
+                                        <p class="text-muted" style="font-size:14px;">No media for this room promotion.</p>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if hd.bills %}
+                        <h4 class="section-title"><i class="fas fa-file-invoice"></i>Bills for this House</h4>
+                        {% for b in hd.bills %}
+                        <div class="bill-block">
+                            <h5>{{ b.title }} ({{ b.amount }} TZS)</h5>
+                            <div class="bill-details">
+                                {{ b.description|default:"No description." }}<br>
+                                <strong>Validity:</strong> {{ b.validity_period }}<br>
+                                {% if b.reference_number %}
+                                <strong>Reference:</strong> {{ b.reference_number }}<br>
+                                {% endif %}
+                                <small>Created at: {{ b.created_at|date:"M d, Y H:i" }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted" style="font-size:14px;">No bills for this house.</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-center text-muted" style="font-size:14px;">No houses assigned.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function(){
+    // Initially, all details are hidden
+    $('.house-header').on('click', function(){
+        let $this = $(this);
+        let $container = $this.closest('.house-block');
+        let $details = $container.find('.house-details-container');
+        let $icon = $this.find('.toggle-icon');
+
+        if($details.is(':visible')) {
+            $details.slideUp(300);
+            $icon.removeClass('open');
+        } else {
+            $details.slideDown(300);
+            $icon.addClass('open');
+        }
+    });
+});
+</script>
+{% endblock %}
